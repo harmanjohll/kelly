@@ -24,7 +24,7 @@ async function cont(page: Page) {
 }
 
 async function walk(page: Page, w: Walk) {
-  await page.goto('/consult/');
+  await page.goto('consult/');
   await page.locator('.step[data-step="say"] .choice', { hasText: w.say }).click();
   if (w.who) {
     await expect(page.locator('.step[data-step="who"]')).toBeVisible();
@@ -105,14 +105,14 @@ test('a gift for myself skips the relationship question', async ({ page }, info)
 });
 
 test('landing page phrases start the consultation at question two', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('./');
   await page.getByRole('link', { name: 'Thank you', exact: true }).click();
   await expect(page.locator('.step[data-step="who"]')).toBeVisible();
   await expect(page.locator('.count')).toHaveText('2 of 6');
 });
 
 test('progress survives a reload', async ({ page }) => {
-  await page.goto('/consult/');
+  await page.goto('consult/');
   await page.locator('.step[data-step="say"] .choice', { hasText: 'Congratulations' }).click();
   await expect(page.locator('.step[data-step="who"]')).toBeVisible();
   await page.reload();
