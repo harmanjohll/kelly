@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sound pairs</title>
+<meta name="description" content="Minimal pairs: train the ear, then the mouth.">
+<link rel="stylesheet" href="../../shared/studio.css">
+<link rel="icon" href="../../shared/icon.svg" type="image/svg+xml">
+<style>
+  .pick { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+  .pick .btn { min-height: 64px; font-size: 1.2rem; font-family: var(--font-display); border-radius: 16px; }
+  .pick .btn.right { background: var(--good); border-color: var(--good); color: #fff; }
+  .pick .btn.wrong { border-color: var(--warn); color: var(--warn); }
+  .big-play { width: 84px; height: 84px; border-radius: 50%; margin: 6px auto 0; display: grid; place-items: center; }
+  .big-play svg { width: 34px; height: 34px; fill: currentColor; stroke: none; }
+</style>
+</head>
+<body data-domain="english" data-tab="practise" data-title="Sound pairs" data-back="../">
+<main class="wrap" id="app"></main>
+<script src="../../shared/core.js"></script>
+<script src="../../shared/content/english.js"></script>
+<script src="../english.js"></script>
+<script>
+(function () {
+  const { $, esc, data, param, playBtn, speech, ICON } = KLS;
+  const E = data('english');
+  const app = $('#app');
+  if (!E) { app.innerHTML = '<p class="empty">Still being written.</p>'; return; }
+
+  function set(p) {
+    document.title = p.label;
+    let mode = 'ear', score = 0, tries = 0, cur = null;
+    function frame(inner) {
+      app.innerHTML = `
+        <div class="page-head"><p class="kicker dom">Sound pairs · /${esc(p.contrast)}/</p><h1>${esc(p.label)}</h1>
+          <div class="card tint" style="margin-top:10px"><p class="kicker">How to make the difference</p><p style="margin:0">${esc(p.tip)}</p></div>
+          <div class="seg" style="margin-top:16px" role="group" aria-label="Mode"><button data-mode="ear" aria-pressed="${mode === 'ear'}">Train the ear</button><button data-mode="mouth" aria-pressed="${mode === 'mouth'}">Train the mouth</button><button data-mode="all" aria-pressed="${mode === 'all'}">All pairs</button></div>
+        </div>${inner}
+        <div class="row" style="margin:26px 0"><a class="btn" href="./">All sound pairs</a></div>`;
+      app.querySelectorAll('[data-mode]').forEach(b => b.addEventListener('click', () => { mode = b.dataset.mode; score = 0; tries = 0; draw(); }));
+    }
+    function draw() {
+      if (mode === 'all') {
+        frame(`<div class="list">${p.pairs.map(([a, b]) => `<div class="item"><span class="grow row">${playBtn(a)}<b>${esc(a)}</b></span><span class="grow row">${playBtn(b)}<b>${esc(b)}</b></span></div>`).join('')}</div>
+          <div class="card" style="margin-top:14px"><p class="kicker">Say this</p><p style="font-family:var(--font-display);font-size:1.2rem">${esc(p.sentence)}</p>${playBtn(p.sentence)}</div>`);
+        return;
+      }
+      if (mode === 'ear') {
+        const pr = p.pairs[Math.floor(Math.random() * p.pairs.length)];
+        const which = Math.random() < 0.5 ? 0 : 1;
+        cur = { pr, which };
+        frame(`<section class="card" style="text-align:center;margin-top:18px">
+          <p class="muted">Listen. Which word did you hear?</p>
+          <button class="btn big-play" id="hear" aria-label="Play the word">${ICON.play}</button>
+          <div class="pick">${pr.map((w, i) => `<button class="btn" data-i="${i}">${esc(w)}</button>`).join('')}</div>
+          <p class="muted small" style="margin-top:12px">${tries ? `${score} of ${tries} right` : 'Device voices are clear but not perfect; if a pair sounds identical, try another accent in Settings.'}</p>
+        </section>`);
+        const play = () => speech.speak(pr[which], { rate: 0.85 });
+        $('#hear').addEventListener('click', play);
+        setTimeout(play, 300);
+        app.querySelector('.pick').addEventListener('click', e => {
+          const b = e.target.closest('[data-i]'); if (!b || app.querySelector('.pick .right')) return;
+          tries++;
+          const ok = Number(b.dataset.i) === which; if (ok) score++;
+          app.querySelectorAll('.pick .btn').forEach(x => x.classList.add(Number(x.dataset.i) === which ? 'right' : 'wrong'));
+          setTimeout(draw, ok ? 900 : 1800);
+        });
+        return;
+      }
+      // mouth: say the shown word, recognition checks which one it heard.
+      const pr = p.pairs[Math.floor(Math.random() * p.pairs.length)];
+      const which = Math.random() < 0.5 ? 0 : 1;
+      frame(`<section class="card" style="text-align:center;margin-top:18px">
+        <p class="muted">Say this word clearly:</p>
+        <p style="font-family:var(--font-display);font-size:2.2rem;margin:.2rem 0">${esc(pr[which])}</p>
+        <p class="muted small">Not to be confused with <b>${esc(pr[1 - which])}</b> ${playBtn(pr[1 - which])}</p>
+        <button class="btn primary dom" id="go" style="margin-top:10px" ${speech.canListen() ? '' : 'disabled'}>${ICON.mic} Say it</button>
+        <p id="res" style="margin-top:12px" class="muted">${speech.canListen() ? (tries ? `${score} of ${tries} recognised` : '') : 'This mode needs speech recognition (Chrome or Safari).'}</p>
+        <button class="btn small" id="nx" style="margin-top:6px">Next word</button>
+      </section>`);
+      $('#nx').addEventListener('click', draw);
+      $('#go').addEventListener('click', async () => {
+        const res = $('#res'); res.textContent = 'Listening...';
+        try {
+          const r = await speech.listen();
+          const alts = r.alternatives.map(KLSRec.norm);
+          const target = KLSRec.norm(pr[which]), other = KLSRec.norm(pr[1 - which]);
+          const top = alts[0] || '';
+          tries++;
+          if (top.split(' ').includes(target)) { score++; res.innerHTML = `Heard <b>${esc(r.transcript)}</b>. Clear.`; }
+          else if (top.split(' ').includes(other)) res.innerHTML = `Heard <b>${esc(r.transcript)}</b>, the other word. Check the tip above and try again.`;
+          else res.innerHTML = r.transcript ? `Heard <b>${esc(r.transcript)}</b>. Try again, a little slower.` : 'Heard nothing. Try again.';
+        } catch (e) { res.textContent = e.message; }
+      });
+    }
+    draw();
+  }
+
+  function index() {
+    app.innerHTML = `<div class="page-head"><p class="kicker dom">English</p><h1>Sound pairs</h1>
+      <p class="lede">Pairs of words that differ by one sound. First learn to hear the difference, then to make it. Most accents blur at least a few of these.</p></div>
+      <div class="list">${E.pairs.map(p => `<a href="?id=${encodeURIComponent(p.id)}"><span class="grow"><div>${esc(p.label)}</div><div class="sub mono">/${esc(p.contrast)}/ · ${p.pairs.length} pairs</div></span><span class="chev">${ICON.chev}</span></a>`).join('')}</div>`;
+  }
+
+  const p = E.pairs.find(x => x.id === param('id'));
+  if (p) set(p); else index();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>English</title>
+<meta name="description" content="Vocabulary, pronunciation, idioms, sayings and slang, with speaking practice.">
+<link rel="stylesheet" href="../shared/studio.css">
+<link rel="icon" href="../shared/icon.svg" type="image/svg+xml">
+</head>
+<body data-domain="english" data-tab="explore" data-title="English" data-back="../explore/">
+<main class="wrap" id="app"></main>
+<script src="../shared/core.js"></script>
+<script src="../shared/content/english.js"></script>
+<script>
+(function () {
+  const { $, esc, data, spaced, playBtn, dailyPick } = KLS;
+  const E = data('english');
+  if (!E) { $('#app').innerHTML = '<p class="empty">English is still being written.</p>'; return; }
+  const count = (deck) => E.words.filter(w => w.deck === deck).length;
+  const dueWords = spaced.due().filter(k => k.startsWith('word:')).length;
+  const tools = [
+    ['words/', 'Words and phrases', `${E.words.length} idioms, sayings, slang and rich vocabulary. Learn, use, review.`],
+    ['say/', 'Say it right', `${E.tricky.length} words people often mispronounce, plus ${E.stress.length} stress shift pairs.`],
+    ['sounds/', 'Sound pairs', `${E.pairs.length} pairs of sounds that blur, like ship and sheep. Train the ear, then the mouth.`],
+    ['shadow/', 'Shadowing', `${E.shadow.length} sentences to copy, with a live line showing your pitch.`],
+    ['aloud/', 'Read aloud', `${E.passages.length} passages. Record a take and get feedback on clarity, pace and expression.`],
+    ['wordlab/', 'Word Lab', 'Type any word you meet. Get meaning, nuance, pronunciation and examples.'],
+  ];
+  const t = dailyPick(E.tricky, 'tricky');
+  $('#app').innerHTML = `
+    <div class="page-head">
+      <p class="kicker dom">English</p>
+      <h1>${esc(E.domain.tagline)}</h1>
+      ${E.domain.intro.slice(0, 1).map(p => `<p class="lede">${esc(p)}</p>`).join('')}
+      ${E.domain.intro.length > 1 ? `<details class="drawer"><summary>How this part works</summary><div class="body prose">${E.domain.intro.slice(1).map(p => `<p>${esc(p)}</p>`).join('')}</div></details>` : ''}
+      <div class="row" style="margin-top:12px">
+        ${dueWords ? `<a class="btn primary dom" href="../review/?only=word">Review ${dueWords} due words</a>` : ''}
+        <a class="btn" href="../web/?d=english">The English web</a>
+      </div>
+    </div>
+    <section><div class="grid">${tools.map(([h, title, sub]) => `<a class="card edge" href="${h}"><h3>${esc(title)}</h3><p class="muted small">${esc(sub)}</p></a>`).join('')}</div></section>
+    <section>
+      <h2>Decks</h2>
+      <div class="list">${E.decks.map(d => `<a href="words/?deck=${d.id}"><span class="grow"><div>${esc(d.label)}</div><div class="sub">${esc(d.blurb || '')}</div></span><span class="tag">${count(d.id)}</span></a>`).join('')}</div>
+    </section>
+    ${t ? `<section><p class="kicker">Tricky word of the day</p><div class="card"><div class="spread"><h3 style="margin:0;font-size:1.4rem">${esc(t.word)}</h3>${playBtn(t.word)}</div>
+      <p class="say" style="margin:.4rem 0"><span class="respell">${esc(t.respell)}</span><span class="ipa">/${esc(t.ipa)}/</span></p>
+      <p class="muted small" style="margin:0">${esc(t.trap)} ${esc(t.tip)}</p>
+      <a class="btn small" style="margin-top:10px" href="say/?id=${encodeURIComponent(t.id)}">Try saying it</a></div></section>` : ''}`;
+})();
+</script>
+</body>
+</html>

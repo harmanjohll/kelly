@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Word Lab</title>
+<meta name="description" content="Type any word you meet and get meaning, nuance, pronunciation and examples.">
+<link rel="stylesheet" href="../../shared/studio.css">
+<link rel="icon" href="../../shared/icon.svg" type="image/svg+xml">
+</head>
+<body data-domain="english" data-tab="practise" data-title="Word Lab" data-back="../">
+<main class="wrap" id="app">
+  <div class="page-head"><p class="kicker dom">English</p><h1>Word Lab</h1>
+    <p class="lede">Met a word in a book, an article or a meeting? Type it here for a precise card: meaning, how it differs from its neighbours, how to say it, and how people use it.</p></div>
+  <form id="f" class="row" style="flex-wrap:nowrap"><input class="input" id="w" maxlength="60" placeholder="e.g. sanguine" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="btn primary dom">Look up</button></form>
+  <div id="card" style="margin-top:16px"></div>
+  <section id="bank"></section>
+</main>
+<script src="../../shared/core.js"></script>
+<script>
+(function () {
+  const { $, esc, playBtn, store } = KLS;
+  const BANK = 'kls.wordlab';
+  const bank = () => { try { return JSON.parse(localStorage.getItem(BANK) || '[]'); } catch (_) { return []; } };
+  const setBank = (b) => { try { localStorage.setItem(BANK, JSON.stringify(b.slice(-300))); } catch (_) {} };
+
+  function render(c) {
+    const arr = (x) => Array.isArray(x) ? x : [];
+    $('#card').innerHTML = `<div class="card edge">
+      <div class="spread"><h2 style="margin:0">${esc(c.term)}</h2>${playBtn(c.term)}</div>
+      <p class="say" style="margin:.3rem 0"><span class="respell">${esc(c.respell || '')}</span><span class="ipa">${c.ipa ? '/' + esc(c.ipa.replace(/^\/|\/$/g, '')) + '/' : ''}</span>${c.ipaUS ? `<span class="ipa muted">US /${esc(c.ipaUS.replace(/^\/|\/$/g, ''))}/</span>` : ''}</p>
+      <div class="row" style="margin:.3rem 0 .8rem"><span class="tag dom">${esc(c.partOfSpeech || '')}</span><span class="tag">${esc(c.register || '')}</span></div>
+      <p style="font-size:1.08rem">${esc(c.meaning)}</p>
+      ${c.nuance ? `<p class="muted">${esc(c.nuance)}</p>` : ''}
+      ${arr(c.examples).length ? `<p class="kicker" style="margin-top:14px">In use</p>${arr(c.examples).map(e => `<p style="font-style:italic;margin-bottom:.5rem">${esc(e)} ${playBtn(e)}</p>`).join('')}` : ''}
+      ${arr(c.collocations).length ? `<p class="kicker" style="margin-top:14px">Goes with</p><div class="row">${arr(c.collocations).map(x => `<span class="chip">${esc(x)}</span>`).join('')}</div>` : ''}
+      ${arr(c.synonyms).length ? `<p class="kicker" style="margin-top:14px">Neighbours</p><div class="row">${arr(c.synonyms).map(x => `<button class="chip" data-look="${esc(x)}">${esc(x)}</button>`).join('')}</div>` : ''}
+      ${c.origin ? `<p class="kicker" style="margin-top:14px">Origin</p><p>${esc(c.origin)}</p>` : ''}
+      ${c.trap ? `<p class="notice">${esc(c.trap)}</p>` : ''}
+      <p class="small muted" style="margin:12px 0 0">Written by the AI. Usually right; check anything surprising in a dictionary.</p>
+    </div>`;
+  }
+  async function look(term) {
+    term = term.trim(); if (!term) return;
+    $('#w').value = term;
+    const cached = bank().find(c => c.term && c.term.toLowerCase() === term.toLowerCase());
+    if (cached) { render(cached); return; }
+    $('#card').innerHTML = KLS.thinking();
+    try {
+      await KLS.loadScript('shared/coach.js');
+      const c = await KLS.ai(KLSCoach.P.wordLab(term));
+      if (!c || !c.meaning) throw new Error('The Coach could not make a card for that. Check the spelling.');
+      c.term = c.term || term; c.iso = new Date().toISOString();
+      render(c);
+      const b = bank().filter(x => x.term.toLowerCase() !== c.term.toLowerCase()); b.push(c); setBank(b); drawBank();
+    } catch (e) { $('#card').innerHTML = `<p class="notice">${esc(e.message)}</p>`; }
+  }
+  function drawBank() {
+    const b = bank().slice().reverse();
+    $('#bank').innerHTML = b.length ? `<h2>Your words</h2><div class="row">${b.map(c => `<button class="chip" data-look="${esc(c.term)}">${esc(c.term)}</button>`).join('')}</div>` : '';
+  }
+  $('#f').addEventListener('submit', e => { e.preventDefault(); look($('#w').value); });
+  document.addEventListener('click', e => { const b = e.target.closest('[data-look]'); if (b) { look(b.dataset.look); scrollTo({ top: 0, behavior: 'smooth' }); } });
+  drawBank();
+  const q = KLS.param('w'); if (q) look(q);
+})();
+</script>
+</body>
+</html>

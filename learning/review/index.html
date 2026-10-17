@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Review</title>
+<meta name="description" content="Spaced review of ideas and words that are due.">
+<link rel="stylesheet" href="../shared/studio.css">
+<link rel="icon" href="../shared/icon.svg" type="image/svg+xml">
+</head>
+<body data-tab="practise" data-title="Review" data-back="../practise/">
+<main class="wrap" id="app"></main>
+<script src="../shared/core.js"></script>
+<script src="../shared/content/philosophy.js"></script>
+<script src="../shared/content/physics.js"></script>
+<script src="../shared/content/psychology.js"></script>
+<script src="../shared/content/english.js"></script>
+<script>
+(function () {
+  const { $, esc, spaced, node, data, nodeHref, DOMAINS, playBtn, shuffle, param } = KLS;
+  const app = $('#app');
+  const E = data('english') || { words: [] };
+  const words = Object.fromEntries(E.words.map(w => [w.id, w]));
+  const only = param('only');
+
+  // Resolve a review key to a card.
+  function card(key) {
+    const [kind, id, idx] = key.split(':');
+    if (kind === 'word') { const w = words[id]; return w && { key, domain: 'english', front: w.term, back: w.meaning, extra: w.example, say: w.term, href: `../english/words/?id=${encodeURIComponent(id)}` }; }
+    if (kind === 'node') { const n = node(id); const r = n && (n.recall || [])[Number(idx)]; return r && { key, domain: n.domain, front: r.q, back: r.a, extra: n.title, href: nodeHref(n.id) }; }
+    return null;
+  }
+  const queue = shuffle(spaced.due().filter(k => !only || k.startsWith(only + ':')).map(card).filter(Boolean)).slice(0, 20);
+  let i = 0; const tally = [0, 0, 0];
+
+  function done() {
+    const upcoming = Object.values(KLS.store.get().review).map(r => r.due).sort();
+    app.innerHTML = `<div class="page-head"><h1>${queue.length ? 'Done for today' : 'Nothing due'}</h1>
+      <p class="lede">${queue.length ? `${tally[2]} knew it, ${tally[1]} shaky, ${tally[0]} not yet. Each one is rescheduled.` : upcoming.length ? `Next card is due on ${new Date(upcoming[0] + 'T12:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}.` : 'Add ideas and words to review from any card, and they will appear here when due.'}</p>
+      <div class="row"><a class="btn" href="../">Today</a><a class="btn" href="../explore/">Explore</a></div></div>`;
+  }
+  function show() {
+    if (i >= queue.length) return done();
+    const c = queue[i];
+    app.innerHTML = `
+      <div class="page-head"><p class="kicker">Review · ${i + 1} of ${queue.length}</p></div>
+      <div class="card flash d-${c.domain}" style="border-top:4px solid var(--dom)">
+        <p class="kicker dom">${esc(DOMAINS[c.domain].name)}</p>
+        <div class="term" style="font-size:${c.front.length > 60 ? '1.25rem' : ''}">${esc(c.front)}</div>
+        ${c.say ? `<div style="margin-top:10px">${playBtn(c.say)}</div>` : ''}
+        <div class="answer" hidden id="ans"><p style="margin:0 0 8px">${esc(c.back)}</p><p class="muted small">${esc(c.extra || '')} · <a href="${c.href}">open card</a></p></div>
+      </div>
+      <div id="ctl" style="margin-top:14px"><button class="btn primary" id="show" style="width:100%">Show answer</button></div>`;
+    $('#show').addEventListener('click', () => {
+      $('#ans').hidden = false;
+      $('#ctl').innerHTML = '<div class="rate"><button class="btn" data-g="0">Not yet</button><button class="btn" data-g="1">Shaky</button><button class="btn primary" data-g="2">Knew it</button></div>';
+      $('#ctl').addEventListener('click', e => { const b = e.target.closest('[data-g]'); if (!b) return; const g = Number(b.dataset.g); tally[g]++; spaced.rate(c.key, g); i++; show(); });
+    });
+  }
+  show();
+})();
+</script>
+</body>
+</html>

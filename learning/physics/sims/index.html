@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Quantum simulations</title>
+<meta name="description" content="Hands on quantum experiments: play first, explain after.">
+<link rel="stylesheet" href="../../shared/studio.css">
+<link rel="icon" href="../../shared/icon.svg" type="image/svg+xml">
+</head>
+<body data-domain="physics" data-tab="explore" data-title="Simulations" data-back="../">
+<main class="wrap" id="app"></main>
+<script src="../../shared/core.js"></script>
+<script src="../../shared/content/physics.js"></script>
+<script>
+(function () {
+  const { $, esc, param, allNodes, nodeHref, ICON } = KLS;
+  const ORDER = ['photoelectric', 'spectra', 'double-slit', 'polarisers', 'stern-gerlach', 'measurement', 'uncertainty', 'box', 'tunnelling', 'bell-game'];
+  const host = (id) => allNodes('physics').find(n => n.sim === id);
+  const app = $('#app');
+  const load = (id) => KLS.loadScript(`physics/sims/${id}.js`).then(() => (window.KLS_SIMS || {})[id]).catch(() => null);
+
+  async function one(id) {
+    const sim = await load(id);
+    const n = host(id);
+    if (!sim) { app.innerHTML = '<p class="empty">That simulation is not ready yet.</p>'; return; }
+    document.title = sim.title;
+    const i = ORDER.indexOf(id);
+    app.innerHTML = `
+      <div class="page-head"><p class="kicker dom">Simulation ${i + 1} of ${ORDER.length}</p><h1>${esc(sim.title)}</h1><p class="lede">${esc(sim.blurb || '')}</p></div>
+      <div><div id="mount"></div><ul class="sim-try">${(sim.try || []).map(t => `<li>${esc(t)}</li>`).join('')}</ul></div>
+      ${n ? `<a class="card edge" href="${nodeHref(n.id)}"><p class="kicker">What it shows</p><h3>${esc(n.title)}</h3><p class="muted small" style="margin:0">${esc(n.line)}</p></a>` : ''}
+      <div class="row" style="justify-content:space-between;margin:24px 0"><a class="btn" href="./">All simulations</a>${i < ORDER.length - 1 ? `<a class="btn primary dom" href="?id=${ORDER[i + 1]}">Next</a>` : ''}</div>`;
+    sim.mount($('#mount'));
+  }
+  async function index() {
+    const sims = await Promise.all(ORDER.map(load));
+    app.innerHTML = `<div class="page-head"><p class="kicker dom">Quantum Physics</p><h1>Simulations</h1>
+      <p class="lede">Play first, explain after. Each one isolates a single strange fact about the quantum world. Roughly in story order.</p></div>
+      <div class="list">${ORDER.map((id, i) => sims[i] ? `<a href="?id=${id}"><span class="num" style="width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--surface-2);font-size:.8rem;flex:none">${i + 1}</span><span class="grow"><div>${esc(sims[i].title)}</div><div class="sub">${esc(sims[i].blurb || '')}</div></span><span class="chev">${ICON.chev}</span></a>` : '').join('')}</div>`;
+  }
+  const id = param('id');
+  if (id && ORDER.includes(id)) one(id); else index();
+})();
+</script>
+</body>
+</html>

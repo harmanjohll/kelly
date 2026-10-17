@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Words and phrases</title>
+<meta name="description" content="Idioms, sayings, slang, phrasal verbs and rich vocabulary.">
+<link rel="stylesheet" href="../../shared/studio.css">
+<link rel="icon" href="../../shared/icon.svg" type="image/svg+xml">
+</head>
+<body data-domain="english" data-tab="explore" data-title="Words and phrases" data-back="../">
+<main class="wrap" id="app"></main>
+<script src="../../shared/core.js"></script>
+<script src="../../shared/content/philosophy.js"></script>
+<script src="../../shared/content/physics.js"></script>
+<script src="../../shared/content/psychology.js"></script>
+<script src="../../shared/content/english.js"></script>
+<script>
+(function () {
+  const { $, esc, data, spaced, playBtn, param, node, nodeHref, DOMAINS, shuffle, store } = KLS;
+  const E = data('english');
+  const app = $('#app');
+  if (!E) { app.innerHTML = '<p class="empty">Still being written.</p>'; return; }
+  const byId = Object.fromEntries(E.words.map(w => [w.id, w]));
+  const deckLabel = Object.fromEntries(E.decks.map(d => [d.id, d.label]));
+  const themeLabel = Object.fromEntries(E.themes.map(t => [t.id, t.label]));
+  const REGION = { general: 'Everywhere', uk: 'British', us: 'American', au: 'Australian', sg: 'Singapore' };
+  const say = (w) => w.say ? `<p class="say" style="margin:.3rem 0 .6rem">${w.say.respell ? `<span class="respell">${esc(w.say.respell)}</span>` : ''}${w.say.ipa ? `<span class="ipa">/${esc(w.say.ipa)}/</span>` : ''}</p>` : '';
+  const tags = (w) => `<span class="tag dom">${esc(deckLabel[w.deck] || w.deck)}</span><span class="tag">${esc(w.register)}</span>${w.region !== 'general' ? `<span class="tag">${esc(REGION[w.region] || w.region)}</span>` : ''}`;
+
+  // ---------- one word ----------
+  function detail(w) {
+    document.title = w.term;
+    const key = 'word:' + w.id;
+    const see = (w.see || []).map(id => byId[id]).filter(Boolean);
+    const links = (w.links || []).map(l => ({ l, n: node(l.to) })).filter(x => x.n);
+    app.innerHTML = `
+      <div class="page-head">
+        <p class="kicker dom">${esc(deckLabel[w.deck])} · ${esc(themeLabel[w.theme] || '')}</p>
+        <div class="spread"><h1 style="margin:0">${esc(w.term)}</h1>${playBtn(w.term)}</div>
+        ${say(w)}
+        <p class="lede" style="color:var(--ink)">${esc(w.meaning)}</p>
+        <p style="font-style:italic" class="muted">${esc(w.example)} <button class="btn ghost small" data-say="${esc(w.example)}">Hear it</button></p>
+        <div class="row">${tags(w)}</div>
+        <div class="row" style="margin-top:14px"><button class="btn small" id="rev">${spaced.has(key) ? 'In your review' : 'Add to review'}</button></div>
+      </div>
+      <section><h2>Where it comes from</h2><p>${esc(w.origin)}</p></section>
+      ${links.length ? `<section><h2>The idea behind it</h2>${links.map(x => `<a class="conn cross" href="${nodeHref(x.n.id)}" style="--c:var(${DOMAINS[x.n.domain].colourVar})"><span class="dot"></span><span><div class="t">${esc(x.n.title)}</div><div class="type">${esc(DOMAINS[x.n.domain].name)}</div><div class="why">${esc(x.l.why)}</div></span></a>`).join('')}</section>` : ''}
+      <section>
+        <h2>Use it</h2>
+        <p class="muted small">Write one sentence of your own with <b>${esc(w.term)}</b>. The Coach checks it is natural and fits the tone.</p>
+        <textarea class="input" id="use" maxlength="400" style="min-height:90px" placeholder="My sentence..."></textarea>
+        <div class="row" style="margin-top:10px"><button class="btn primary dom" id="use-go">Check my sentence</button></div>
+        <div class="coach" id="use-out" style="display:none;margin-top:12px"></div>
+      </section>
+      ${see.length ? `<section><h2>Related</h2><div class="row">${see.map(s => `<a class="chip" href="?id=${encodeURIComponent(s.id)}">${esc(s.term)}</a>`).join('')}</div></section>` : ''}
+      <div class="row" style="margin:28px 0"><a class="btn" href="?deck=${w.deck}">All ${esc(deckLabel[w.deck].toLowerCase())}</a><a class="btn" href="../../web/?d=english&focus=${encodeURIComponent(w.id)}">See in the web</a></div>`;
+    $('#rev').addEventListener('click', e => {
+      if (spaced.has(key)) { spaced.remove(key); e.target.textContent = 'Add to review'; } else { spaced.add(key); e.target.textContent = 'In your review'; KLS.toast('Added to review'); }
+    });
+    $('#use-go').addEventListener('click', async () => {
+      const s = $('#use').value.trim(); const out = $('#use-out');
+      if (s.length < 6) { KLS.toast('Write a sentence first.'); return; }
+      out.style.display = 'block'; out.innerHTML = KLS.thinking();
+      try { await KLS.loadScript('shared/coach.js'); const r = await KLS.ai(KLSCoach.P.wordUse(w, s)); out.innerHTML = `<div class="msg me">${esc(s)}</div><div class="msg ai">${KLS.coachHtml(r)}</div>`; }
+      catch (err) { out.innerHTML = `<p class="notice">${esc(err.message)}</p>`; }
+    });
+  }
+
+  // ---------- flash cards ----------
+  function cards(deck, reverse) {
+    const pool = E.words.filter(w => !deck || w.deck === deck);
+    // New words first, then ones you have met, a dozen at a time.
+    const fresh = pool.filter(w => !spaced.has('word:' + w.id));
+    const queue = shuffle(fresh).concat(shuffle(pool.filter(w => spaced.has('word:' + w.id)))).slice(0, 12);
+    let i = 0, known = 0;
+    function show() {
+      if (i >= queue.length) {
+        app.innerHTML = `<div class="page-head"><h1>Done</h1><p class="lede">${known} of ${queue.length} you knew. The rest will come back sooner.</p>
+          <div class="row"><a class="btn primary dom" href="?deck=${deck || ''}&mode=cards${reverse ? '&rev=1' : ''}">Another dozen</a><a class="btn" href="?deck=${deck || ''}">Back to the list</a></div></div>`;
+        return;
+      }
+      const w = queue[i];
+      app.innerHTML = `
+        <div class="page-head"><div class="spread"><p class="kicker">${esc(deck ? deckLabel[deck] : 'All words')} · ${i + 1} of ${queue.length}</p><a class="btn ghost small" href="?deck=${deck || ''}">Stop</a></div></div>
+        <div class="card flash">
+          <div class="term">${esc(reverse ? w.meaning : w.term)}</div>
+          ${reverse ? '<p class="muted small" style="margin-top:10px">Which word or phrase means this?</p>' : `<div style="margin-top:12px">${playBtn(w.term)}</div>`}
+          <div class="answer" id="ans" hidden>
+            ${reverse ? `<p style="font-family:var(--font-display);font-size:1.4rem;margin:0 0 6px">${esc(w.term)}</p>${say(w)}` : `<p style="margin:0 0 8px">${esc(w.meaning)}</p>`}
+            <p class="muted small" style="font-style:italic">${esc(w.example)}</p>
+            <div class="row">${tags(w)}</div>
+          </div>
+        </div>
+        <div id="ctl" style="margin-top:14px"><button class="btn primary dom" id="show" style="width:100%">Show</button></div>`;
+      $('#show').addEventListener('click', () => {
+        $('#ans').hidden = false;
+        $('#ctl').innerHTML = `<div class="rate"><button class="btn" data-g="0">Not yet</button><button class="btn" data-g="1">Shaky</button><button class="btn primary dom" data-g="2">Knew it</button></div>`;
+        $('#ctl').addEventListener('click', (e) => {
+          const b = e.target.closest('[data-g]'); if (!b) return;
+          const gr = Number(b.dataset.g); if (gr === 2) known++;
+          spaced.add('word:' + w.id); spaced.rate('word:' + w.id, gr);
+          i++; show();
+        });
+      });
+    }
+    show();
+  }
+
+  // ---------- list ----------
+  function list(deck) {
+    const st = { q: '', reg: null, region: null };
+    app.innerHTML = `
+      <div class="page-head">
+        <p class="kicker dom">English</p>
+        <h1>${esc(deck ? deckLabel[deck] : 'Words and phrases')}</h1>
+        ${deck ? `<p class="lede">${esc((E.decks.find(d => d.id === deck) || {}).blurb || '')}</p>` : ''}
+        <div class="row" style="margin-top:10px">
+          <a class="btn primary dom" href="?deck=${deck || ''}&mode=cards">Practise with cards</a>
+          <a class="btn" href="?deck=${deck || ''}&mode=cards&rev=1">Meaning first</a>
+        </div>
+      </div>
+      <div class="chips" id="decks">${[['', 'All']].concat(E.decks.map(d => [d.id, d.label])).map(([id, l]) => `<a class="chip ${id === (deck || '') ? 'on' : ''}" href="?deck=${id}">${esc(l)}</a>`).join('')}</div>
+      <div class="search" style="margin:10px 0"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input class="input" id="q" type="search" placeholder="Search words and meanings"></div>
+      <div class="chips" id="regs"></div>
+      <p class="muted small" id="n" style="margin:8px 0"></p>
+      <div class="list" id="list"></div>`;
+    const pool = E.words.filter(w => !deck || w.deck === deck);
+    function draw() {
+      const regs = ['formal', 'neutral', 'informal', 'slang'].filter(r => pool.some(w => w.register === r));
+      const regions = Object.keys(REGION).filter(r => r !== 'general' && pool.some(w => w.region === r));
+      $('#regs').innerHTML = regs.map(r => `<button class="chip ${st.reg === r ? 'on' : ''}" data-reg="${r}">${r[0].toUpperCase() + r.slice(1)}</button>`).join('') +
+        regions.map(r => `<button class="chip ${st.region === r ? 'on' : ''}" data-region="${r}">${REGION[r]}</button>`).join('');
+      const q = st.q.toLowerCase();
+      const hits = pool.filter(w => (!st.reg || w.register === st.reg) && (!st.region || w.region === st.region) && (!q || (w.term + ' ' + w.meaning).toLowerCase().includes(q)))
+        .sort((a, b) => a.term.localeCompare(b.term));
+      $('#n').textContent = `${hits.length} ${hits.length === 1 ? 'entry' : 'entries'}`;
+      $('#list').innerHTML = hits.map(w => `<a href="?id=${encodeURIComponent(w.id)}"><span class="grow"><div>${esc(w.term)}${spaced.has('word:' + w.id) ? ' <span class="tag">in review</span>' : ''}</div><div class="sub">${esc(w.meaning)}</div></span><span class="chev">${KLS.ICON.chev}</span></a>`).join('') || '<div class="item muted">Nothing matches.</div>';
+    }
+    $('#q').addEventListener('input', e => { st.q = e.target.value; draw(); });
+    $('#regs').addEventListener('click', e => {
+      const a = e.target.closest('[data-reg]'), b = e.target.closest('[data-region]');
+      if (a) st.reg = st.reg === a.dataset.reg ? null : a.dataset.reg;
+      if (b) st.region = st.region === b.dataset.region ? null : b.dataset.region;
+      draw();
+    });
+    draw();
+  }
+
+  const id = param('id'), deck = param('deck') || null;
+  if (id && byId[id]) detail(byId[id]);
+  else if (param('mode') === 'cards') cards(deck, param('rev') === '1');
+  else list(deck);
+})();
+</script>
+</body>
+</html>
