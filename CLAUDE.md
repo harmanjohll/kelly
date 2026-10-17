@@ -1,8 +1,14 @@
-# Notes for AI assistants working on this repo
+# Rules for every session working in this repo
 
-- The business belongs to Kelly. Credit all work and story to Kelly. Use they/them for Kelly unless told otherwise.
-- House style for all visible copy: no em dashes or en dashes (tests enforce this), and avoid hyphens in prose. First person singular, as Kelly. See `docs/brand-voice.md`.
-- No dark patterns: no fake urgency, no fake stock counts, prices shown in full. This is a brand stance and a legal requirement in Singapore (CCCS).
-- Never invent facts about Kelly (anecdotes, hours, customers). Use placeholders and list them in `docs/content-from-kelly.md`.
-- Coach logic is pure and tested (`src/lib/*.ts`, `tests/unit`). Safety and cultural rules live in data (`src/data/rules.json`), never in model output.
-- Before pushing: `npm test`, `npm run build`, `npm run test:e2e`.
+This repo holds several independent projects. More than one session may be working here at once.
+
+1. **Stay inside your project's folder.** Every project lives in `apps/<name>/`. Create, edit and delete files only inside your own folder.
+2. **New project? New folder.** Start a new project in `apps/<name>/` with its own `package.json`, README and tests. Never put project files at the repo root.
+3. **The root is shared.** Only this file, `README.md` and `.gitignore` live at the root. Change them only to add your project to the README table or to add a shared ignore pattern.
+4. **Never move, rename or delete another project's folder.**
+5. **Run commands from your folder** (`cd apps/<name>`), so installs and builds stay local to it.
+6. Each project may have its own `CLAUDE.md` with project rules; read it before working there.
+
+Current projects:
+
+- `apps/floral`: Kelly's floral studio website. See `apps/floral/CLAUDE.md`.
