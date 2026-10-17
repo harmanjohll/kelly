@@ -37,10 +37,10 @@ Adding a rule needs no code: add an entry to `rules.json` with `when` (all condi
 
 ## Deploy (GitHub Pages)
 
-The repo's workflow (`.github/workflows/pages.yml`) builds this site on every merge to `main` and publishes it at **https://harmanjohll.github.io/kelly/**. It runs the unit tests first and stops if they fail.
+The repo's workflow (`.github/workflows/pages.yml`) builds this site on every merge to `main` and publishes it at **https://harmanjohll.github.io/kelly/floral/**. It runs the unit tests first and stops if they fail.
 
 - **One time setup:** on GitHub, go to Settings, then Pages, and set Source to "GitHub Actions".
-- **Testing locally under the Pages path:** `BASE_PATH=/kelly npm run build`, or `BASE_PATH=/kelly npm run test:e2e`.
+- **Testing locally under the Pages path:** `BASE_PATH=/kelly/floral npm run build`, or `BASE_PATH=/kelly/floral npm run test:e2e`.
 - **Internal links:** always build them with `url()` from `src/lib/url.ts`, never as a bare `/path`, so they work under `/kelly/` and on a custom domain alike.
 
 ## Before launch
