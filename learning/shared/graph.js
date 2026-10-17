@@ -173,6 +173,7 @@
       .web-node.near text, .web-node.focus text { display: block !important; }
       .web-node.focus circle { stroke: var(--ink); stroke-width: 2.5; }
       .web-node.person circle { stroke-width: 2.4; }
+      .web-node circle.hit { fill: transparent !important; stroke: none !important; }
       .web-node.foreign circle { stroke-dasharray: 2 2; }`;
     document.head.appendChild(style);
 
@@ -203,8 +204,8 @@
     function paint() {
       if (!nodeSel) return;
       nodeSel.select('circle')
-        .attr('fill', n => PERSON.has(n.kind) ? C.bg : fill(n))
-        .attr('stroke', n => PERSON.has(n.kind) ? fill(n) : C.bg);
+        .style('fill', n => PERSON.has(n.kind) ? C.bg : fill(n))
+        .style('stroke', n => PERSON.has(n.kind) ? fill(n) : null);
     }
 
     function fitAll(dur) {
@@ -244,14 +245,19 @@
     function drawFocus(id, animate) {
       const centre = model.byId.get(id) || Object.assign({ type: 'content' }, getNode(id));
       const nb = egoNeighbours(id);
+      // Lay out at true size in the space the panel leaves free, so labels stay readable.
       const r = stage.getBoundingClientRect();
+      const sheetOpen = o.sheet && o.sheet.classList.contains('on');
+      const wide = r.width >= 900;
+      const W = r.width - (sheetOpen && wide ? 400 : 0);
+      const H = sheetOpen && !wide ? r.height * 0.64 : r.height;
       const n = nb.length;
-      const R1 = Math.max(120, Math.min(210, 60 + n * 9));
-      const two = n > 14;
+      const R = Math.max(90, Math.min(260, Math.min(W * 0.42, H / 2 - 34)));
+      const two = n > (W < 500 ? 9 : 14);
       const pts = [{ d: centre, x: 0, y: 0, c: true }].concat(nb.map((x, i) => {
         const a = -Math.PI / 2 + (i / Math.max(1, n)) * 2 * Math.PI;
-        const rr = two ? (i % 2 ? R1 * 1.45 : R1) : R1;
-        return { d: x.n, x: rr * Math.cos(a), y: rr * Math.sin(a), link: x };
+        const rr = two ? (i % 2 ? R : R * 0.6) : R;
+        return { d: x.n, x: rr * Math.cos(a), y: rr * Math.sin(a) * (W < 500 ? 1.05 : 1), link: x };
       }));
       gEdges.selectAll('*').remove();
       gEdges.selectAll('path').data(pts.slice(1)).join('path')
@@ -259,19 +265,23 @@
         .attr('d', p => `M0,0L${p.x},${p.y}`)
         .attr('opacity', p => p.link.structural ? 0.35 : 0.8);
       gNodes.selectAll('*').remove();
+      const maxChars = W < 500 ? (two ? 12 : 16) : 24;
       const gs = gNodes.selectAll('g').data(pts, p => p.d.id).join('g')
         .attr('class', p => `web-node near ${p.d.type || 'content'}` + (p.c ? ' focus' : '') + (PERSON.has(p.d.kind) ? ' person' : ''))
         .attr('transform', p => animate ? 'translate(0,0)' : `translate(${p.x},${p.y})`)
+        .style('cursor', 'pointer')
         .on('click', (ev, p) => { ev.stopPropagation(); if (!p.c) select(p.d.id, true); });
-      gs.append('circle').attr('r', p => p.c ? 16 : p.d.type === 'hub' ? 14 : p.d.type === 'group' ? 10 : 8)
-        .attr('fill', p => PERSON.has(p.d.kind) ? C.bg : fill(p.d)).attr('stroke', p => PERSON.has(p.d.kind) ? fill(p.d) : C.bg);
+      // A generous invisible target so small dots are easy to tap.
+      gs.append('circle').attr('class', 'hit').attr('r', 20);
+      gs.append('circle').attr('r', p => p.c ? 15 : p.d.type === 'hub' ? 12 : p.d.type === 'group' ? 9 : 7)
+        .style('fill', p => PERSON.has(p.d.kind) ? C.bg : fill(p.d)).style('stroke', p => PERSON.has(p.d.kind) ? fill(p.d) : null);
       gs.append('text').attr('text-anchor', 'middle')
-        .attr('dy', p => p.c ? 32 : (p.y < -4 ? -14 : 22))
-        .style('font-size', p => p.c ? '15px' : '12px').style('font-weight', p => p.c ? 600 : 400)
-        .text(p => short(p.d.title, p.c ? 34 : r.width < 500 ? 16 : 24));
+        .attr('dy', p => p.c ? 32 : (p.y < -4 ? -13 : 21))
+        .style('font-size', p => p.c ? '15px' : two && W < 500 ? '11px' : '12px').style('font-weight', p => p.c ? 600 : 400)
+        .text(p => short(p.d.title, p.c ? (W < 500 ? 22 : 30) : maxChars));
       if (animate) gs.transition().duration(450).ease(d3.easeCubicOut).attr('transform', p => `translate(${p.x},${p.y})`);
-      const ext = (two ? R1 * 1.45 : R1) + 40;
-      fitBox(-ext, -ext, ext, ext, animate ? 400 : 0, 1.6);
+      const tr = d3.zoomIdentity.translate(W / 2, H / 2 + (H < r.height ? 6 : 0));
+      (animate ? svg.transition().duration(400) : svg).call(zoom.transform, tr);
     }
 
     // ---------- selection, trail, sheet ----------
@@ -279,9 +289,9 @@
       if (!model.byId.get(id) && !getNode(id)) return;
       focusId = id;
       if (travel) { const i = trail.indexOf(id); if (i >= 0) trail = trail.slice(0, i + 1); else trail.push(id); if (trail.length > 12) trail.shift(); }
+      renderSheet(id);
       if (mode === 'focus') drawFocus(id, true);
       else highlight(id);
-      renderSheet(id);
       renderTrail();
       if (o.onChange) o.onChange({ focus: id, mode });
     }
@@ -347,7 +357,7 @@
     }
     if (o.sheet) o.sheet.addEventListener('click', (e) => {
       const go = e.target.closest('[data-go]'); if (go) { select(go.dataset.go, true); return; }
-      if (e.target.closest('[data-close-sheet]')) { if (mode === 'focus') o.sheet.classList.remove('on'); else clearFocus(); return; }
+      if (e.target.closest('[data-close-sheet]')) { if (mode === 'focus') { o.sheet.classList.remove('on'); if (focusId) drawFocus(focusId, true); } else clearFocus(); return; }
       if (e.target.closest('[data-mode-toggle]')) setMode(mode === 'focus' ? 'overview' : 'focus');
     });
 
@@ -356,7 +366,7 @@
       if (m === 'focus') {
         if (!focusId) focusId = model.nodes.find(n => n.type === 'hub').id;
         if (!trail.length) trail = [focusId];
-        drawFocus(focusId, true); renderSheet(focusId); renderTrail();
+        renderSheet(focusId); drawFocus(focusId, true); renderTrail();
       } else {
         drawOverview();
         if (focusId) { highlight(focusId); renderSheet(focusId); } else fitAll(300);

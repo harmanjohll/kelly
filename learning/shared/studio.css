@@ -331,7 +331,7 @@ details.drawer > .body { padding: 0 16px 16px; }
 .web-node.hub text { font-family: var(--font-display); font-size: 15px; font-weight: 600; }
 .web-node.group text { font-size: 12.5px; font-weight: 600; }
 .web-edge { fill: none; stroke: var(--line); stroke-width: 1; transition: opacity .2s; }
-.web-edge.cross { stroke: var(--accent-2); stroke-dasharray: 4 4; opacity: .7; }
+.web-edge.cross { stroke: var(--accent-2); stroke-dasharray: 4 4; opacity: .45; }
 .web-edge.hot { stroke: var(--ink); stroke-width: 1.6; opacity: 1; }
 .web-edge.cross.hot { stroke: var(--accent-2); stroke-width: 2; }
 .dim { opacity: .12; }
@@ -347,7 +347,7 @@ details.drawer > .body { padding: 0 16px 16px; }
 .web-sheet {
   position: absolute; left: 0; right: 0; bottom: 0; z-index: 5; background: var(--surface); border-top: 1px solid var(--line);
   border-radius: 18px 18px 0 0; padding: 14px 16px 16px; box-shadow: 0 -8px 30px rgba(0, 0, 0, .12);
-  transform: translateY(105%); transition: transform .25s ease; max-height: 62%; overflow: auto;
+  transform: translateY(105%); transition: transform .25s ease; max-height: 36%; overflow: auto;
 }
 .web-sheet.on { transform: translateY(0); }
 @media (min-width: 900px) {
