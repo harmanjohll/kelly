@@ -1,13 +1,13 @@
 # Content schema
 
-Source of truth for every content file in `apps/learning/shared/content/`. Validate with `npm test` inside `apps/learning` (checks ids, link targets, facets, prose rules).
+Source of truth for every content file in `learning/shared/content/`. Validate with `npm test` inside `learning/` (checks ids, link targets, facets, prose rules).
 
 ## 1. File shape
 
 Each file is plain JavaScript that registers one domain:
 
 ```js
-/* apps/learning/shared/content/philosophy.js */
+/* learning/shared/content/philosophy.js */
 (function (g) {
   g.KLS_DATA = g.KLS_DATA || {};
   g.KLS_DATA.philosophy = {
@@ -118,7 +118,7 @@ g.KLS_DATA.english = {
 
 ## 6. Simulations
 
-One file per sim at `apps/learning/physics/sims/<id>.js`:
+One file per sim at `learning/physics/sims/<id>.js`:
 
 ```js
 (function (g) {

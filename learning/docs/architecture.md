@@ -35,9 +35,9 @@ Left behind: everything PSLE specific (papers, marks, countdown, SBC, examiner m
 
 No server. Export and import in You moves progress between devices.
 
-## 4. Living alongside other apps
+## 4. Living alongside other projects
 
-The repo holds several apps under `apps/`. The studio is `apps/learning/`, plain static files. The shared `.github/workflows/pages.yml` runs this folder's `npm test` (the validator), then copies it to `_site/learning/`, so broken content cannot publish. Internal links are relative and `core.js` finds the site root from its own script address, so the base path `/kelly/learning/` needs no configuration.
+The repo holds several projects in top level folders; the studio is `learning/`, plain static files with relative links. `core.js` finds the site root from its own script address, so the base path `/kelly/learning/` needs no configuration. Hosting is governed by the root `CLAUDE.md`. Run `npm test` inside `learning/` before pushing, since nothing checks the content automatically on deploy.
 
 ## 5. Known limits
 

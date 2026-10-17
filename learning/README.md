@@ -7,7 +7,7 @@ Live: https://harmanjohll.github.io/kelly/learning/
 ## Run it locally
 
 ```bash
-cd apps/learning
+cd learning
 python3 -m http.server 8000
 # then open http://localhost:8000/
 ```
@@ -15,7 +15,7 @@ python3 -m http.server 8000
 ## Test
 
 ```bash
-cd apps/learning
+cd learning
 npm test   # validates every content file against docs/content-schema.md
 ```
 

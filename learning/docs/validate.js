@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* Validates shared/content/*.js against docs/content-schema.md.
-   Usage (inside apps/learning): npm test, or node docs/validate.js [domain ...]
+   Usage (inside learning/): npm test, or node docs/validate.js [domain ...]
    Exits 1 on any error. Warnings do not fail. */
 
 const fs = require('fs');
