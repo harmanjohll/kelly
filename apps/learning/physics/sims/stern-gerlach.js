@@ -9,7 +9,8 @@
   var EXTRA_CSS =
     '.sim-stern-gerlach .sg-mag{display:flex;flex-wrap:wrap;gap:8px;align-items:center}' +
     '.sim-stern-gerlach .sg-mag .sg-name{min-width:5.2em;font-size:.92em;color:var(--muted)}' +
-    '.sim-stern-gerlach .sg-mag .sg-gap{width:6px}';
+    '.sim-stern-gerlach .sg-keep{display:inline-flex;gap:8px;align-items:center}' +
+    '.sim-stern-gerlach .sg-keep .sg-name{min-width:0;margin-left:6px}';
 
   /* ---------- small shared helpers (each sim file is self contained) ---------- */
   function clamp(x, a, b) { return x < a ? a : x > b ? b : x; }
@@ -247,11 +248,12 @@
       z.setAttribute('aria-label', 'Magnet ' + (i + 1) + ' set to Z');
       x.setAttribute('aria-label', 'Magnet ' + (i + 1) + ' set to X');
       row.appendChild(z); row.appendChild(x);
-      row.appendChild(mk('span', 'sg-gap'));
-      var keepLab = mk('span', 'sg-name', 'pass on');
+      var keepLab = mk('span', 'sg-keep');
+      keepLab.appendChild(mk('span', 'sg-name', 'pass on'));
       var k0 = chip('up', false, function () { st.keep[i] = 0; syncControls(); changed(); });
       var k1 = chip('down', false, function () { st.keep[i] = 1; syncControls(); changed(); });
-      row.appendChild(keepLab); row.appendChild(k0); row.appendChild(k1);
+      keepLab.appendChild(k0); keepLab.appendChild(k1);
+      row.appendChild(keepLab);
       magRows.push({ row: row, z: z, x: x, keepLab: keepLab, k0: k0, k1: k1 });
       controls.appendChild(row);
     })(i);
@@ -279,7 +281,7 @@
         m.row.style.display = i < st.n ? '' : 'none';
         setChip(m.z, st.axis[i] === 'Z'); setChip(m.x, st.axis[i] === 'X');
         var last = i === st.n - 1;
-        m.keepLab.style.display = m.k0.style.display = m.k1.style.display = last ? 'none' : '';
+        m.keepLab.style.display = last ? 'none' : '';
         m.k0.textContent = WORDS[st.axis[i]][0]; m.k1.textContent = WORDS[st.axis[i]][1];
         setChip(m.k0, st.keep[i] === 0); setChip(m.k1, st.keep[i] === 1);
       });
@@ -328,7 +330,7 @@
       var y0 = Math.round(H * 0.47);
       var bw = clamp(W * 0.12, 42, 92), bh = clamp(H * 0.26, 58, 92);
       var ovenX = Math.max(26, W * 0.05);
-      var endX = W - Math.max(28, W * 0.05);
+      var endX = W - clamp(W * 0.1, 40, 64) / 2 - 12;
       var left = ovenX + 34, right = endX - 46;
       var n = st.n, cx = [];
       for (var i = 0; i < n; i++) cx.push(left + (right - left) * (n === 1 ? 0.45 : (i + 0.5) / n) - (n === 1 ? 0 : bw * 0.1));
@@ -546,10 +548,12 @@
       var lab = WORDS[st.axis[i]][s] + (ent ? ' ' + pct(count / ent) : '');
       c.font = '10px ' + T.body; c.fillStyle = T.stageMuted;
       c.textBaseline = s === 0 ? 'bottom' : 'top';
+      var lx = pos.x;
+      if (!blocked) { c.textAlign = 'right'; lx = pos.x + w / 2; }
       var ly = s === 0 ? pos.y - h / 2 - 3 : pos.y + h / 2 + 3;
-      c.fillText(lab, pos.x, ly);
+      c.fillText(lab, lx, ly);
       c.fillStyle = rgba(T.gold, 0.9);
-      c.fillText('expect ' + pct(pr.split[i][s]), pos.x, ly + (s === 0 ? -12 : 12));
+      c.fillText('expect ' + pct(pr.split[i][s]), lx, ly + (s === 0 ? -12 : 12));
     }
 
     function drawPassLabel(i, s, T) {

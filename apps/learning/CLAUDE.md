@@ -2,23 +2,25 @@
 # Kelly's Learning Studio
 # Build contract for Claude Code
 
-Folder: `learning/` inside `harmanjohll/kelly` (public repo)
+Folder: `apps/learning/` inside `harmanjohll/kelly` (public repo)
+Live: https://harmanjohll.github.io/kelly/learning/
 Owner: Harman Johll
 Learner: Kelly, 40, a mother, wife, daughter and sister. Good in English, wants to be even better. Learning for depth and curiosity, not for an exam.
 AI provider: Google Gemini, learner supplies her own key (same flow as Harman's other platforms)
 Sister project for reference: `harmanjohll/johllygoodlearning` (`/lab/`, `/studio/`, `/english/`)
 
-Read this file fully before every session. It overrides the root `CLAUDE.md` only for work inside `learning/`.
+Read this file fully before every session. It adds to the root `CLAUDE.md` for work inside `apps/learning/`.
 
 ---
 
-## 1. Coexistence with the floral site
+## 1. Living alongside other apps
 
-The repo root is an Astro site (Kelly's floral studio) that builds `src/` and `public/` to `dist/` and deploys to Cloudflare Pages. The Learning Studio must never disturb it.
+The repo holds several independent apps under `apps/`; read the root `CLAUDE.md` first. The studio is `apps/learning/`.
 
-- Everything for the studio lives under `learning/`. Do not edit `src/`, `public/`, `tests/`, `package.json`, `astro.config.mjs` or the root `CLAUDE.md`.
-- The studio is plain static files. No build step, no npm dependency. Astro ignores this folder.
-- Deployment: `.github/workflows/learning-pages.yml` publishes only `learning/` to GitHub Pages, at `https://harmanjohll.github.io/kelly/`. The repo owner must set Settings, Pages, Source to "GitHub Actions" once.
+- Everything for the studio lives under `apps/learning/`. Never touch another app's folder.
+- The studio is plain static files. No build step, no npm dependency. `npm test` (run inside `apps/learning`) runs the content validator.
+- Deployment is the shared `.github/workflows/pages.yml`: it runs `npm test` here, then copies this folder to `_site/learning/`. Live at `https://harmanjohll.github.io/kelly/learning/`.
+- Every internal link is relative, and `core.js` derives the site root from its own script address, so the studio works under any base path.
 - Because `harmanjohll.github.io` is shared with johllygoodlearning, localStorage is shared on the same browser. Studio keys are namespaced `kls.*`. The Gemini key deliberately reuses `jgl.geminiKey` so Harman's existing key works.
 
 ---
@@ -61,13 +63,14 @@ AI audio feedback is good on pace, clarity and expression, weaker on single soun
 ## 4. Architecture
 
 ```
-learning/
+apps/learning/
   CLAUDE.md                  this file
-  package.json               only marks the folder as CommonJS so the validator runs (root is ESM)
+  package.json               npm test runs the validator (CommonJS; no dependencies)
+  README.md
   index.html                 Today (time based session plan, word of the day, idea of the day, one cross domain link)
   docs/architecture.md       build note
   docs/content-schema.md     node, link, module, English and simulation schemas (source of truth)
-  docs/validate.js           content validator: node learning/docs/validate.js
+  docs/validate.js           content validator (npm test)
   shared/
     studio.css               tokens and components (light and dark)
     core.js                  KLS namespace: storage, chrome (top bar, tab bar, settings), node lookup,

@@ -442,7 +442,7 @@
       c.fillText('frequency (THz)', P.x + P.w / 2 + (L.stacked ? 0 : 0), by + 19);
       c.save();
       c.translate(P.x - 30, P.y + P.h / 2); c.rotate(-Math.PI / 2);
-      c.textBaseline = 'middle'; c.fillText('fastest electron (eV)', 0, 0);
+      c.textBaseline = 'middle'; c.fillText(P.h < 125 ? 'fastest (eV)' : 'fastest electron (eV)', 0, 0);
       c.restore();
       c.textAlign = 'left'; c.textBaseline = 'middle'; c.fillStyle = T.muted;
       c.fillText('IR', P.x + 2, by - 7);

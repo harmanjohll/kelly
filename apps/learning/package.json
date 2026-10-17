@@ -1,0 +1,9 @@
+{
+  "name": "learning",
+  "private": true,
+  "type": "commonjs",
+  "description": "Kelly's Learning Studio. Static files, no build step, no dependencies.",
+  "scripts": {
+    "test": "node docs/validate.js"
+  }
+}

@@ -43,10 +43,17 @@ jobs:
           npm test
           npm run build
 
+      - name: Check the Learning Studio
+        working-directory: apps/learning
+        run: npm test
+
       - name: Assemble the Pages site
         run: |
           mkdir -p _site/floral
           cp -r apps/floral/dist/. _site/floral/
+          # The Learning Studio is static files with no build step.
+          mkdir -p _site/learning
+          cp -r apps/learning/. _site/learning/
           # Unknown paths anywhere on the site get the floral "page not found" page.
           cp apps/floral/dist/404.html _site/404.html
           # The bare address sends visitors on to the floral site.

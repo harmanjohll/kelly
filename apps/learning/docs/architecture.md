@@ -35,9 +35,9 @@ Left behind: everything PSLE specific (papers, marks, countdown, SBC, examiner m
 
 No server. Export and import in You moves progress between devices.
 
-## 4. Coexistence with the floral site
+## 4. Living alongside other apps
 
-The repo root is an Astro project deployed to Cloudflare Pages. The studio sits in `learning/`, which Astro never reads. `learning/package.json` exists only so Node runs the validator as CommonJS (the root declares ES modules). Deployment is a separate workflow, `.github/workflows/learning-pages.yml`, triggered only by changes under `learning/`, publishing that folder alone to GitHub Pages.
+The repo holds several apps under `apps/`. The studio is `apps/learning/`, plain static files. The shared `.github/workflows/pages.yml` runs this folder's `npm test` (the validator), then copies it to `_site/learning/`, so broken content cannot publish. Internal links are relative and `core.js` finds the site root from its own script address, so the base path `/kelly/learning/` needs no configuration.
 
 ## 5. Known limits
 

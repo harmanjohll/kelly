@@ -1,5 +1,0 @@
-{
-  "private": true,
-  "type": "commonjs",
-  "description": "Kelly's Learning Studio: static files, no build. This file only tells Node to run docs/validate.js as CommonJS."
-}
