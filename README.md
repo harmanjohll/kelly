@@ -20,7 +20,8 @@ npm run dev
 
 Everything is hosted on **GitHub Pages**, free, from this repo. No other server is needed.
 
-- Live address: **https://harmanjohll.github.io/kelly/** (the floral site)
+- Floral site: **https://harmanjohll.github.io/kelly/floral/**
+- The bare address, https://harmanjohll.github.io/kelly/, forwards to the floral site.
 - Every merge to `main` rebuilds and redeploys, through `.github/workflows/pages.yml`.
 - Another app publishes under its own path, e.g. `https://harmanjohll.github.io/kelly/<app-name>/`, by adding a build step to that workflow.
 

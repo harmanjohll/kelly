@@ -9,7 +9,7 @@ export default defineConfig({
   testDir: 'tests/e2e',
   fullyParallel: true,
   reporter: 'list',
-  // Set BASE_PATH=/kelly to test the site exactly as GitHub Pages serves it.
+  // Set BASE_PATH=/kelly/floral to test the site exactly as GitHub Pages serves it.
   use: { baseURL: `http://localhost:4322${process.env.BASE_PATH ?? ''}/`, launchOptions },
   webServer: {
     command: 'npm run build && npx astro preview --port 4322',
