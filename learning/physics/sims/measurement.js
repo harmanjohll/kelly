@@ -178,7 +178,7 @@
     var geo = {};
     function layout(st) {
       var W = st.W, H = st.H;
-      var leftW = W < 520 ? Math.round(W * 0.56) : Math.min(Math.round(W * 0.5), H + 60);
+      var leftW = W < 520 ? Math.round(W * (W < 400 ? 0.6 : 0.56)) : Math.min(Math.round(W * 0.5), H + 60);
       var R = Math.max(60, Math.min(leftW / 2 - 30, H / 2 - 46));
       geo = { cx: leftW / 2 + 4, cy: H / 2 - 8, R: R, rx0: leftW + 14, rx1: W - 12 };
     }

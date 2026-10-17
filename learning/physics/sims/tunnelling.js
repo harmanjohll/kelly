@@ -311,7 +311,7 @@
       ctx.beginPath(); ctx.moveTo(padX, eY + 0.5); ctx.lineTo(W - padX, eY + 0.5); ctx.stroke();
       ctx.setLineDash([]);
       ctx.fillStyle = C.gold; ctx.textAlign = 'right';
-      ctx.fillText('packet energy', W - padX - 4, eY - 5);
+      ctx.fillText('packet energy', W - padX - 4, eY + 14);
 
       // probability density, filled
       var i0 = Math.max(0, Math.floor((-VIEW - XMIN) / dx)), i1 = Math.min(N - 1, Math.ceil((VIEW - XMIN) / dx));
@@ -378,8 +378,8 @@
         s.acc += dt;
         if (s.acc < 0.15) return;
         steps = Math.round(s.acc * 60 * 8); s.acc = 0;
-      } else steps = Math.max(1, Math.round(dt * 60 * 8));
-      steps = Math.min(steps, 80);
+        steps = Math.min(steps, 80);
+      } else steps = Math.min(12, Math.max(1, Math.round(dt * 60 * 8))); // slow down gracefully on busy phones
       for (var k = 0; k < steps; k++) step();
       last = tally();
       var tHit = (-p.width / 2 - X0) / s.k0;

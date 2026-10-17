@@ -148,7 +148,7 @@
     '.sim-box .sim-group{display:flex;flex-wrap:wrap;gap:8px}',
     '.sim-box .sim-row .grow{flex:1 1 0;min-width:0}',
     '.sim-box .sim-lab{font-size:.82rem;color:var(--muted);margin-right:2px;align-self:center;font-family:var(--font-mono)}',
-    '.sim-box .chip.lvl{min-width:44px;justify-content:center;font-family:var(--font-mono)}'
+    '.sim-box .chip.lvl{min-width:42px;padding:0 10px;justify-content:center;font-family:var(--font-mono)}'
   ].join('\n');
 
   var NMAX = 60, M = 240, SIG = 0.04, LEVELS = 5;
@@ -296,7 +296,7 @@
       // headers
       ctx.font = '11px ' + C.body; ctx.textAlign = 'left'; ctx.fillStyle = C.muted;
       ctx.fillText('Wave, real part', x0, A.top - 6);
-      ctx.fillText('Chance of finding it, |ψ|²', x0, B.top - 6);
+      ctx.fillText(x1 - x0 < 260 ? 'Chance, |ψ|²' : 'Chance of finding it, |ψ|²', x0, B.top - 6);
       ctx.textAlign = 'right'; ctx.fillStyle = C.gold;
       ctx.fillText(s.playing ? 'always moving' : 'paused', x1 - 4, A.top - 6);
       ctx.fillStyle = stationary ? C.muted : C.gold;
@@ -382,7 +382,7 @@
 
     var row1 = h('div', 'sim-row');
     var lg = h('div', 'sim-group');
-    lg.appendChild(h('span', 'sim-lab', 'Levels n ='));
+    lg.appendChild(h('span', 'sim-lab', 'n ='));
     var chips = [];
     for (var nn = 1; nn <= LEVELS; nn++) {
       (function (n) {
@@ -507,7 +507,7 @@
       'Choose one level on its own. The wave keeps turning, yet the chance pattern below stays perfectly still.',
       'Add level 2 to level 1. The chance now sloshes from side to side. Watch the little clocks drift in and out of step.',
       'Drag a level sideways to give it a bigger or smaller share, and see how the slosh changes.',
-      'Press Measure position. The particle is found at one spot, then the spike spreads out at once. Wait, and it gathers itself again.'
+      'Choose Slow, then press Measure position. The particle is found at one spot and the spike spreads out at once. Wait, and it gathers itself again.'
     ],
     mount: mount
   };

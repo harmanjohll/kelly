@@ -308,7 +308,7 @@ details.drawer > .body { padding: 0 16px 16px; }
 
 /* ---------- simulations ---------- */
 .sim { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; margin: 18px 0; }
-.sim-canvas { display: block; width: 100%; border-radius: 10px; background: var(--bg); touch-action: none; }
+.sim-canvas { display: block; width: 100%; border-radius: 10px; background: var(--bg); touch-action: pan-y; }
 .sim-controls { display: flex; flex-wrap: wrap; gap: 10px 16px; margin-top: 12px; align-items: flex-end; }
 .sim-control { display: flex; flex-direction: column; gap: 4px; font-size: .82rem; color: var(--muted); flex: 1 1 140px; min-width: 0; }
 .sim-control input[type="range"] { width: 100%; accent-color: var(--phys); min-height: 30px; }
