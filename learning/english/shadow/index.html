@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Shadowing</title>
+<meta name="description" content="Copy the music of English with a live pitch line.">
+<link rel="stylesheet" href="../../shared/studio.css">
+<link rel="icon" href="../../shared/icon.svg" type="image/svg+xml">
+</head>
+<body data-domain="english" data-tab="practise" data-title="Shadowing" data-back="../">
+<main class="wrap" id="app"></main>
+<script src="../../shared/core.js"></script>
+<script src="../../shared/audio.js"></script>
+<script src="../../shared/pitch.js"></script>
+<script src="../../shared/content/english.js"></script>
+<script src="../english.js"></script>
+<script>
+(function () {
+  const { $, esc, data, param } = KLS;
+  const E = data('english');
+  const app = $('#app');
+  if (!E) { app.innerHTML = '<p class="empty">Still being written.</p>'; return; }
+  const items = E.shadow;
+  const focuses = Array.from(new Set(items.map(x => x.focus)));
+  let i = Math.max(0, items.findIndex(x => x.id === param('id')));
+  let focus = null;
+
+  function pool() { return focus ? items.filter(x => x.focus === focus) : items; }
+  function draw() {
+    const list = pool();
+    if (!list.includes(items[i])) i = items.indexOf(list[0]);
+    const it = items[i];
+    const k = list.indexOf(it);
+    app.innerHTML = `
+      <div class="page-head"><p class="kicker dom">English</p><h1>Shadowing</h1>
+        <p class="lede">Listen, then speak along or straight after, copying the rhythm, the stressed words and the rise and fall. The line shows your pitch as you speak.</p></div>
+      <div class="chips">${[null].concat(focuses).map(f => `<button class="chip ${f === focus ? 'on' : ''}" data-f="${esc(f || '')}">${esc(f || 'All patterns')}</button>`).join('')}</div>
+      <div class="card" style="margin-top:12px">
+        <div class="spread"><p class="kicker" style="margin:0">${esc(it.focus)} · ${k + 1} of ${list.length}</p></div>
+        <p style="font-family:var(--font-display);font-size:1.45rem;line-height:1.35;margin:.6rem 0">${esc(it.text)}</p>
+        ${it.marks ? `<p class="mono small" style="color:var(--dom)">${esc(it.marks)}</p>` : ''}
+        <div class="row"><button class="btn primary dom" data-say="${esc(it.text)}">Listen</button><button class="btn" data-say="${esc(it.text)}" data-rate="0.75">Slowly</button></div>
+      </div>
+      <section style="margin-top:18px"><div id="rec"></div>
+        <div class="row" style="margin-top:10px"><button class="btn" id="ask" disabled>Ask the Coach about my take</button></div>
+        <div class="coach" id="out" style="display:none;margin-top:12px"></div></section>
+      <div class="row" style="justify-content:space-between;margin:20px 0"><button class="btn" id="prev">Previous</button><button class="btn primary dom" id="next">Next sentence</button></div>`;
+    const r = KLSRec.mount($('#rec'), { maxMs: 20000, pitch: true, label: 'Record and see my pitch', onTake: () => { $('#ask').disabled = false; } });
+    $('#ask').addEventListener('click', () => KLSRec.coachTake($('#out'), r.take, P => P.shadow(it), { kind: 'shadow', ref: it.id }));
+    $('#next').addEventListener('click', () => { i = items.indexOf(list[(k + 1) % list.length]); draw(); });
+    $('#prev').addEventListener('click', () => { i = items.indexOf(list[(k - 1 + list.length) % list.length]); draw(); });
+    app.querySelector('.chips').addEventListener('click', e => { const b = e.target.closest('[data-f]'); if (!b) return; focus = b.dataset.f || null; i = items.indexOf(pool()[0]); draw(); });
+  }
+  draw();
+})();
+</script>
+</body>
+</html>

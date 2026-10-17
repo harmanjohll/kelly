@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Practise</title>
+<meta name="description" content="Review, speaking practice and ways to make ideas stick.">
+<link rel="stylesheet" href="../shared/studio.css">
+<link rel="icon" href="../shared/icon.svg" type="image/svg+xml">
+</head>
+<body data-tab="practise" data-title="Practise">
+<main class="wrap" id="app"></main>
+<script src="../shared/core.js"></script>
+<script>
+(function () {
+  const { $, esc, spaced, store, ICON } = KLS;
+  const due = spaced.due();
+  const total = Object.keys(store.get().review).length;
+  const row = (h, t, s, cls) => `<a href="${h}" class="${cls || ''}"><span class="grow"><div>${esc(t)}</div><div class="sub">${esc(s)}</div></span><span class="chev">${ICON.chev}</span></a>`;
+  $('#app').innerHTML = `
+    <div class="page-head"><h1>Practise</h1><p class="lede">Reading feels like learning. Retrieving, explaining and speaking are what make it stick.</p></div>
+    <section>
+      <a class="card tint" href="../review/" style="display:block">
+        <p class="kicker">Review</p>
+        <h3 style="font-size:1.4rem">${due.length ? `${due.length} ${due.length === 1 ? 'card is' : 'cards are'} due` : total ? 'Nothing due today' : 'Your review is empty'}</h3>
+        <p class="muted small" style="margin:0">${total ? `${total} cards in rotation. They return after 1, 2, 4, 8, 16, 30 and 60 days as they settle.` : 'Add ideas and words to review from any card. They come back just as you are about to forget them.'}</p>
+      </a>
+    </section>
+    <section><h2>Speak</h2><div class="list">
+      ${row('../english/say/', 'Say it right', 'Tricky words and stress shifts', 'd-english')}
+      ${row('../english/sounds/', 'Sound pairs', 'Hear and make the difference', 'd-english')}
+      ${row('../english/shadow/', 'Shadowing', 'Copy the music, see your pitch', 'd-english')}
+      ${row('../english/aloud/', 'Read aloud', 'Record a passage, get feedback', 'd-english')}
+    </div></section>
+    <section><h2>Words</h2><div class="list">
+      ${row('../english/words/?mode=cards', 'Word cards', 'A dozen idioms, sayings, slang or vocabulary')}
+      ${row('../english/wordlab/', 'Word Lab', 'Look up any word you meet')}
+    </div></section>
+    <section><h2>Think</h2><div class="list">
+      ${row('../web/', 'Wander the Mind Web', 'Follow a connection you did not expect')}
+      ${row('../physics/sims/', 'Quantum simulations', 'Play first, explain after')}
+    </div>
+    <p class="muted small" style="margin-top:10px">Every idea card also has Explain it back, a Coach conversation, and Why? on each connection.</p></section>`;
+})();
+</script>
+</body>
+</html>

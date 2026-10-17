@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>You</title>
+<meta name="description" content="An honest picture of your learning, plus settings and backups.">
+<link rel="stylesheet" href="../shared/studio.css">
+<link rel="icon" href="../shared/icon.svg" type="image/svg+xml">
+<style>.stat { font-family: var(--font-display); font-size: 2rem; line-height: 1; }</style>
+</head>
+<body data-tab="you" data-title="You">
+<main class="wrap" id="app"></main>
+<script src="../shared/core.js"></script>
+<script src="../shared/content/philosophy.js"></script>
+<script src="../shared/content/physics.js"></script>
+<script src="../shared/content/psychology.js"></script>
+<script src="../shared/content/english.js"></script>
+<script>
+(function () {
+  const { $, esc, store, spaced, allNodes, DOMAINS, todayIso, addDays, data, nodeHref } = KLS;
+  function render() {
+    const S = store.get();
+    const days = Array.from({ length: 28 }, (_, i) => addDays(todayIso(), i - 27));
+    const week = days.slice(-7).reduce((a, d) => a + (S.minutes[d] || 0), 0);
+    const prevWeek = days.slice(-14, -7).reduce((a, d) => a + (S.minutes[d] || 0), 0);
+    const activeDays = days.filter(d => S.minutes[d]).length;
+    const doms = ['philosophy', 'physics', 'psychology'];
+    const seenBy = Object.fromEntries(doms.map(d => [d, allNodes(d).filter(n => S.seen[n.id]).length]));
+    const totalBy = Object.fromEntries(doms.map(d => [d, allNodes(d).length]));
+    const weekAgo = new Date(Date.now() - 7 * 864e5).toISOString();
+    const seenWeek = Object.fromEntries(doms.map(d => [d, allNodes(d).filter(n => S.seen[n.id] && S.seen[n.id] > weekAgo).length]));
+    const settled = spaced.settled();
+    const due = spaced.due().length;
+    const speaking = S.speaking.length;
+    const level = (m) => !m ? 0 : m < 10 ? 1 : m < 25 ? 2 : 3;
+    // One honest sentence about time.
+    let line = week ? `You spent about ${Math.round(week)} minutes here this week` : 'No time logged this week yet';
+    if (week && prevWeek) line += week >= prevWeek ? `, up from ${Math.round(prevWeek)} the week before.` : `, against ${Math.round(prevWeek)} the week before.`;
+    else line += '.';
+    const quiet = doms.filter(d => !seenWeek[d]);
+    const busiest = doms.slice().sort((a, b) => seenWeek[b] - seenWeek[a])[0];
+    const balance = seenWeek[busiest] && quiet.length ? `Most of this week went to ${DOMAINS[busiest].name}. ${quiet.map(d => DOMAINS[d].name).join(' and ')} had no visits; a single card would reconnect the thread.` : '';
+    const firstDay = new Date(addDays(todayIso(), -27) + 'T12:00').getDay();
+    const pad = (firstDay + 6) % 7; // Monday first
+    $('#app').innerHTML = `
+      <div class="page-head"><h1>${esc(S.profile.name || 'Kelly')}</h1><p class="lede">${esc(line)} ${esc(balance)}</p></div>
+      <section class="grid two">
+        <div class="card"><div class="stat">${Object.keys(S.seen).length}</div><p class="muted small" style="margin:6px 0 0">ideas and people visited</p></div>
+        <div class="card"><div class="stat">${settled}</div><p class="muted small" style="margin:6px 0 0">cards settling into memory (reviewed well at least twice)</p></div>
+        <div class="card"><div class="stat">${due}</div><p class="muted small" style="margin:6px 0 0">due for review ${due ? '<a href="../review/">now</a>' : 'today'}</p></div>
+        <div class="card"><div class="stat">${S.explains.length + speaking}</div><p class="muted small" style="margin:6px 0 0">explanations written and takes recorded</p></div>
+      </section>
+      <section><h2>Showing up</h2><p class="muted small">The last four weeks, Monday first. Darker means more minutes. ${activeDays} active days.</p>
+        <div class="heat">${'<i style="visibility:hidden"></i>'.repeat(pad)}${days.map(d => `<i data-l="${level(S.minutes[d])}" title="${d}: ${Math.round(S.minutes[d] || 0)} min"></i>`).join('')}</div></section>
+      <section><h2>The rooms</h2>${doms.map(d => `<div class="d-${d}" style="margin:12px 0"><div class="spread small"><span>${DOMAINS[d].name}</span><span class="muted">${seenBy[d]} of ${totalBy[d]}</span></div><div class="bar"><i style="width:${totalBy[d] ? Math.round(100 * seenBy[d] / totalBy[d]) : 0}%"></i></div></div>`).join('')}
+        <div class="d-english" style="margin:12px 0"><div class="spread small"><span>English words in review</span><span class="muted">${Object.keys(S.review).filter(k => k.startsWith('word:')).length} of ${((data('english') || {}).words || []).length}</span></div><div class="bar"><i style="width:${Math.round(100 * Object.keys(S.review).filter(k => k.startsWith('word:')).length / Math.max(1, ((data('english') || {}).words || []).length))}%"></i></div></div>
+      </section>
+      ${S.explains.length ? `<section><h2>Your explanations</h2><div class="list">${S.explains.slice(-6).reverse().map(x => { const n = KLS.node(x.id); return n ? `<a href="${nodeHref(n.id)}"><span class="grow"><div>${esc(n.title)}</div><div class="sub">${esc(x.text.slice(0, 90))}${x.text.length > 90 ? '…' : ''}</div></span></a>` : ''; }).join('')}</div></section>` : ''}
+      <section><h2>Settings and backups</h2>
+        <p class="muted small">Progress lives in this browser only. To move it between your phone and laptop, export here and import there.</p>
+        <div class="row"><button class="btn" id="set">Settings</button><button class="btn" id="exp">Export progress</button><label class="btn" style="cursor:pointer">Import<input type="file" id="imp" accept="application/json" hidden></label><button class="btn ghost" id="reset">Start over</button></div>
+      </section>
+      <p class="footer-note">Kelly's Learning Studio. Everything stays on this device.</p>`;
+    $('#set').addEventListener('click', () => KLS.openSettings());
+    $('#exp').addEventListener('click', () => {
+      const blob = new Blob([JSON.stringify({ progress: store.get(), wordlab: JSON.parse(localStorage.getItem('kls.wordlab') || '[]') }, null, 1)], { type: 'application/json' });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `learning-studio-${todayIso()}.json`; a.click();
+    });
+    $('#imp').addEventListener('change', async (e) => {
+      const f = e.target.files[0]; if (!f) return;
+      try {
+        const j = JSON.parse(await f.text());
+        const p = j.progress || j;
+        if (!p || p.version !== 1) throw new Error('That file is not a studio backup.');
+        if (!confirm('Replace the progress in this browser with the backup?')) return;
+        store.replace(p);
+        if (j.wordlab) localStorage.setItem('kls.wordlab', JSON.stringify(j.wordlab));
+        KLS.toast('Backup restored'); render();
+      } catch (err) { KLS.toast(err.message || 'Could not read that file.'); }
+    });
+    $('#reset').addEventListener('click', () => { if (confirm('Clear all progress in this browser? Your Gemini key is kept.')) { store.reset(); render(); } });
+  }
+  render();
+})();
+</script>
+</body>
+</html>

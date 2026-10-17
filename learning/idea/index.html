@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Idea</title>
+<meta name="description" content="An idea card: what it is, how it connects, and room to think.">
+<link rel="stylesheet" href="../shared/studio.css">
+<link rel="icon" href="../shared/icon.svg" type="image/svg+xml">
+<style>
+  .mini { width: 100%; height: 300px; display: block; }
+  .mini text { font-size: 11px; fill: var(--ink); paint-order: stroke; stroke: var(--surface); stroke-width: 3px; stroke-linejoin: round; }
+  .mini a:hover circle { stroke: var(--ink); stroke-width: 2; }
+  .conn-wrap { display: flex; gap: 8px; align-items: flex-start; }
+  .conn-wrap .conn { flex: 1; }
+  .probe { margin-top: 10px; flex: none; }
+  .journey { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; background: color-mix(in srgb, var(--dom) 8%, var(--surface)); margin-top: 14px; font-size: .9rem; }
+  .recall-a { display: none; margin-top: 6px; color: var(--ink); }
+  .recall-a.on { display: block; }
+</style>
+</head>
+<body data-tab="explore" data-back="../explore/">
+<main class="wrap" id="app"></main>
+<script src="../shared/core.js"></script>
+<script src="../shared/content/philosophy.js"></script>
+<script src="../shared/content/physics.js"></script>
+<script src="../shared/content/psychology.js"></script>
+<script src="../shared/content/english.js"></script>
+<script>
+(function () {
+  const { $, esc, rich, param, node, neighbours, linkLabel, nodeHref, DOMAINS, data, store, spaced, ROOT, domainOf, playBtn } = KLS;
+  const app = $('#app');
+  const id = param('id');
+  const n = node(id);
+  if (!n) { app.innerHTML = '<div class="empty"><p>That idea was not found.</p><a class="btn" href="../explore/">Explore</a></div>'; return; }
+  const d = n.domain;
+  const D = data(d) || {};
+  document.body.dataset.domain = d;
+  document.body.dataset.title = DOMAINS[d].name;
+  document.body.dataset.back = '../' + DOMAINS[d].href;
+  document.querySelector('.topbar .name') && (document.querySelector('.topbar .name').textContent = DOMAINS[d].name);
+  const backEl = document.querySelector('.topbar .back'); if (backEl) backEl.href = '../' + DOMAINS[d].href;
+  document.title = n.title;
+  KLS.markSeen(n.id);
+
+  const mod = (D.modules || []).find(m => m.id === param('m'));
+  const pos = mod ? mod.path.indexOf(n.id) : -1;
+  const facetLabel = (fid, vid) => { const f = (D.facets || []).find(x => x.id === fid); const v = f && f.values.find(x => x.id === vid); return v ? v.label : vid; };
+  const nb = neighbours(n.id);
+  const S = store.get();
+  const recallKeys = (n.recall || []).map((_, i) => `node:${n.id}:${i}`);
+  const inReview = () => recallKeys.length && recallKeys.every(k => spaced.has(k));
+
+  function badge() {
+    let h = '';
+    if (n.evidence) h += `<span class="badge ev-${n.evidence}">${n.evidence === 'failed' ? 'Failed to replicate' : n.evidence[0].toUpperCase() + n.evidence.slice(1) + ' evidence'}</span>`;
+    if (n.status) h += `<span class="badge st-${n.status}">${n.status === 'settled' ? 'Settled science' : n.status === 'interpretation' ? 'Interpretation' : 'Open question'}</span>`;
+    return h;
+  }
+  function stepLink(i, label) {
+    if (!mod || i < 0 || i >= mod.path.length) return '';
+    return `<a class="btn small ${label === 'Next' ? 'primary dom' : ''}" href="${nodeHref(mod.path[i])}&m=${encodeURIComponent(mod.id)}">${label}</a>`;
+  }
+
+  // Group connections by how they relate.
+  const groups = {};
+  nb.forEach(x => { const l = linkLabel(x.type, x.dir); (groups[l] = groups[l] || []).push(x); });
+  const connHtml = Object.entries(groups).map(([label, list]) => `
+    <p class="kicker" style="margin:16px 0 2px">${esc(label)}</p>
+    ${list.map(x => { const t = node(x.id); const cross = domainOf(x.id) !== d; return `<div class="conn-wrap">
+      <a class="conn${cross ? ' cross' : ''}" href="${nodeHref(x.id)}" style="--c:var(${DOMAINS[t.domain].colourVar})">
+        <span class="dot"></span><span><div class="t">${esc(t.title)}</div>${cross ? `<div class="type">${esc(DOMAINS[t.domain].name)}</div>` : ''}<div class="why">${esc(x.why || '')}</div></span>
+      </a><button class="btn ghost small probe" data-probe="${esc(x.id)}" aria-label="Explain this link in your own words">Why?</button></div>`; }).join('')}`).join('');
+
+  const people = (n.people || []).map(node).filter(Boolean);
+
+  app.innerHTML = `
+    ${mod ? `<div class="journey"><span class="grow" style="flex:1"><span class="muted">Journey</span> · ${esc(mod.title)} · ${pos + 1} of ${mod.path.length}</span>${stepLink(pos - 1, 'Back')}</div>` : ''}
+    <article class="page-head">
+      <p class="kicker dom">${esc(DOMAINS[d].name)} · ${esc(n.kindLabel || n.kind)}</p>
+      <h1>${esc(n.title)}</h1>
+      ${n.say ? `<p class="say">${playBtn(n.say.text || n.title)}<span class="respell">${esc(n.say.respell || '')}</span><span class="ipa">/${esc(n.say.ipa || '')}/</span></p>` : ''}
+      ${n.life || n.place ? `<p class="muted small" style="margin:.2rem 0 .6rem">${esc([n.life, n.place].filter(Boolean).join(' · '))}</p>` : ''}
+      <p class="lede">${esc(n.line)}</p>
+      <div class="row" style="margin:10px 0 4px">${badge()}
+        ${Object.entries(n.facets || {}).map(([f, vs]) => vs.map(v => `<span class="tag">${esc(facetLabel(f, v))}</span>`).join('')).join('')}
+      </div>
+      <div class="row" style="margin-top:12px">
+        <button class="btn small" id="save">${S.saved[n.id] ? 'Saved' : 'Save'}</button>
+        ${recallKeys.length ? `<button class="btn small" id="rev">${inReview() ? 'In your review' : 'Add to review'}</button>` : ''}
+        <a class="btn small" href="${ROOT}web/?d=${d}&focus=${encodeURIComponent(n.id)}">See in the web</a>
+      </div>
+    </article>
+
+    <div class="prose">${(n.body || []).map(p => `<p>${rich(p)}</p>`).join('')}</div>
+    ${n.evidenceNote ? `<p class="notice"><b>About the evidence.</b> ${esc(n.evidenceNote)}</p>` : ''}
+    ${n.sim ? `<div id="sim" style="margin:22px 0"><p class="kicker">Simulation</p><div id="sim-host"><p class="muted small">Loading simulation...</p></div><ul class="sim-try" id="sim-try"></ul></div>` : ''}
+    ${(n.maths || []).length ? `<details class="drawer"><summary>The maths, if you want it</summary><div class="body">${n.maths.map(m => `<div class="maths">${esc(m)}</div>`).join('')}</div></details>` : ''}
+    ${n.quote ? `<blockquote class="quote">${esc(n.quote.text)}<cite>${esc(n.quote.source)}</cite></blockquote>` : ''}
+    ${n.objection ? `<section><h2>The best objection</h2><p class="prose">${esc(n.objection)}</p></section>` : ''}
+
+    ${people.length ? `<section><h2>People</h2><div class="row">${people.map(p => `<a class="chip" href="${nodeHref(p.id)}">${esc(p.title)}</a>`).join('')}</div></section>` : ''}
+
+    <section>
+      <h2>Connections</h2>
+      <p class="muted small">Tap <b>Why?</b> to explain a link in your own words and get a response from the Coach.</p>
+      ${nb.length ? `<svg class="mini" id="mini" viewBox="-200 -150 400 300" aria-label="Neighbourhood"></svg>` : ''}
+      ${connHtml || '<p class="muted">No connections yet.</p>'}
+    </section>
+
+    ${(n.prompts || []).length ? `<section><h2>Sit with this</h2>${n.prompts.map(p => `<p class="card tint">${esc(p)}</p>`).join('')}</section>` : ''}
+
+    ${(n.recall || []).length ? `<section><h2>Check yourself</h2><p class="muted small">Answer in your head first, then reveal.</p>
+      <div class="list">${n.recall.map((r, i) => `<div class="item" style="display:block"><div>${esc(r.q)}</div><button class="btn ghost small" data-reveal="${i}" style="margin:6px 0 0 -10px">Reveal</button><div class="recall-a" id="ra-${i}">${esc(r.a)}</div></div>`).join('')}</div>
+    </section>` : ''}
+
+    <section>
+      <h2>Explain it back</h2>
+      <p class="muted small">Explain ${esc(n.title)} as if to a friend over coffee. Plain words. The Coach will say what is solid, what is missing, and ask one question.</p>
+      <textarea class="input" id="ex" maxlength="1500" placeholder="In my own words..."></textarea>
+      <div class="row" style="margin-top:10px"><button class="btn primary dom" id="ex-go">Get feedback</button><span class="muted small" id="ex-n"></span></div>
+      <div id="ex-out" class="coach" style="margin-top:12px;display:none"></div>
+    </section>
+
+    <section>
+      <h2>Talk it through</h2>
+      <p class="muted small">Ask anything about this idea, or push back on it. The Coach answers briefly and asks you something in return.</p>
+      <div class="coach"><div id="chat"></div>
+        <div class="row" style="margin-top:8px;flex-wrap:nowrap"><input class="input" id="say" maxlength="300" placeholder="Your question or thought"><button class="btn primary dom" id="say-go">Send</button></div>
+      </div>
+    </section>
+
+    ${(n.further || []).length ? `<section><h2>Further reading</h2><ul>${n.further.map(f => `<li>${rich(f)}</li>`).join('')}</ul></section>` : ''}
+
+    <div class="row" style="justify-content:space-between;margin:30px 0 10px">
+      ${mod ? stepLink(pos - 1, 'Back') || '<span></span>' : '<span></span>'}
+      ${mod ? (pos < mod.path.length - 1 ? stepLink(pos + 1, 'Next') : `<a class="btn primary dom" href="../${DOMAINS[d].href}">Journey complete</a>`) : (nb.length ? `<a class="btn" id="wander" href="${nodeHref(KLS.dailyPick(nb, n.id + Date.now()).id)}">Wander to a neighbour</a>` : '')}
+    </div>`;
+
+  // Save and review.
+  $('#save').addEventListener('click', e => { const on = KLS.toggleSaved(n.id); e.target.textContent = on ? 'Saved' : 'Save'; KLS.toast(on ? 'Saved to You' : 'Removed'); });
+  const rev = $('#rev');
+  if (rev) rev.addEventListener('click', () => {
+    if (inReview()) { recallKeys.forEach(spaced.remove); rev.textContent = 'Add to review'; KLS.toast('Removed from review'); }
+    else { recallKeys.forEach(spaced.add); rev.textContent = 'In your review'; KLS.toast('Added. It will come back when it is due.'); }
+  });
+  app.addEventListener('click', e => {
+    const r = e.target.closest('[data-reveal]');
+    if (r) { $('#ra-' + r.dataset.reveal).classList.add('on'); r.remove(); }
+  });
+
+  // Mini neighbourhood map: plain SVG, no library.
+  const mini = $('#mini');
+  if (mini) {
+    const list = nb.slice(0, 14);
+    const R = 110;
+    const colour = (x) => `var(${DOMAINS[x.domain].colourVar})`;
+    const short = (s) => s.length > 20 ? s.slice(0, 19) + '…' : s;
+    mini.innerHTML = list.map((x, i) => {
+      const a = -Math.PI / 2 + i * 2 * Math.PI / list.length; const t = node(x.id);
+      const px = R * 1.25 * Math.cos(a), py = R * Math.sin(a);
+      const cross = t.domain !== d;
+      return `<line x1="0" y1="0" x2="${px}" y2="${py}" stroke="${cross ? 'var(--accent-2)' : 'var(--line)'}" ${cross ? 'stroke-dasharray="4 4"' : ''} stroke-width="1.2"/>`;
+    }).join('') + list.map((x, i) => {
+      const a = -Math.PI / 2 + i * 2 * Math.PI / list.length; const t = node(x.id);
+      const px = R * 1.25 * Math.cos(a), py = R * Math.sin(a);
+      return `<a href="${nodeHref(t.id)}"><circle cx="${px}" cy="${py}" r="6.5" fill="${colour(t)}" stroke="var(--surface)" stroke-width="1.5"/><text x="${px}" y="${py + (py < 0 ? -11 : 19)}" text-anchor="middle">${esc(short(t.title))}</text></a>`;
+    }).join('') + `<circle r="12" fill="${colour(n)}"/><text y="28" text-anchor="middle" style="font-weight:600;font-size:12px">${esc(short(n.title))}</text>`;
+  }
+
+  // Simulation.
+  if (n.sim) {
+    KLS.loadScript(`physics/sims/${n.sim}.js`).then(() => {
+      const sim = (window.KLS_SIMS || {})[n.sim];
+      const host = $('#sim-host');
+      if (!sim) { host.innerHTML = '<p class="muted small">This simulation is not ready yet.</p>'; return; }
+      host.innerHTML = `<h3>${esc(sim.title)}</h3><p class="muted small">${esc(sim.blurb || '')}</p><div id="sim-mount"></div>`;
+      sim.mount($('#sim-mount'));
+      $('#sim-try').innerHTML = (sim.try || []).map(t => `<li>${esc(t)}</li>`).join('');
+    }).catch(() => { $('#sim-host').innerHTML = '<p class="muted small">The simulation could not load.</p>'; });
+  }
+
+  // Explain it back.
+  const ex = $('#ex');
+  const saved = (store.get().explains || []).filter(x => x.id === n.id).pop();
+  if (saved) { ex.value = saved.text; showEx(saved.feedback); }
+  ex.addEventListener('input', () => { $('#ex-n').textContent = ex.value.length > 1200 ? `${1500 - ex.value.length} characters left` : ''; });
+  function showEx(fb) { const o = $('#ex-out'); o.style.display = 'block'; o.innerHTML = `<div class="msg ai">${KLS.coachHtml(fb)}</div>`; }
+  $('#ex-go').addEventListener('click', async () => {
+    const text = ex.value.trim();
+    if (text.length < 25) { KLS.toast('Write a few sentences first.'); return; }
+    const o = $('#ex-out'); o.style.display = 'block'; o.innerHTML = KLS.thinking();
+    try {
+      await KLS.loadScript('shared/coach.js');
+      const fb = await KLS.ai(KLSCoach.P.explain(n, text));
+      showEx(fb);
+      store.update(s => { s.explains.push({ id: n.id, iso: new Date().toISOString(), text, feedback: fb }); if (s.explains.length > 200) s.explains.shift(); });
+    } catch (e) { o.innerHTML = `<p class="notice">${esc(e.message)}</p>`; }
+  });
+
+  // Dialogue.
+  const history = [];
+  const chat = $('#chat');
+  function addMsg(role, text) { const div = document.createElement('div'); div.className = 'msg ' + (role === 'user' ? 'me' : 'ai'); div.textContent = text; chat.appendChild(div); return div; }
+  async function send() {
+    const inp = $('#say'); const t = inp.value.trim(); if (!t) return;
+    inp.value = ''; addMsg('user', t); history.push({ role: 'user', content: t });
+    const wait = document.createElement('div'); wait.innerHTML = KLS.thinking(); chat.appendChild(wait);
+    try {
+      await KLS.loadScript('shared/coach.js');
+      const r = await KLS.ai(KLSCoach.P.dialogue(n, history.slice(-12)));
+      wait.remove(); addMsg('assistant', r.trim()); history.push({ role: 'assistant', content: r.trim() });
+    } catch (e) { wait.remove(); addMsg('assistant', e.message); history.pop(); }
+  }
+  $('#say-go').addEventListener('click', send);
+  $('#say').addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
+
+  // Connection probe.
+  app.addEventListener('click', e => {
+    const b = e.target.closest('[data-probe]'); if (!b) return;
+    const other = node(b.dataset.probe); const link = nb.find(x => x.id === other.id);
+    const m = KLS.modal(`<p class="kicker">Why are these connected?</p>
+      <h3>${esc(n.title)} and ${esc(other.title)}</h3>
+      <p class="muted small">Say it in your own words first. Then compare.</p>
+      <textarea class="input" id="pr" maxlength="600" placeholder="They connect because..." style="min-height:110px"></textarea>
+      <div class="row" style="margin-top:10px"><button class="btn primary dom" id="pr-go">Ask the Coach</button><button class="btn ghost" id="pr-show">Just show me</button><button class="btn ghost" data-close>Close</button></div>
+      <div id="pr-out" style="margin-top:12px"></div>`, { label: 'Explain a connection' });
+    m.el.querySelector('#pr-show').addEventListener('click', () => { m.el.querySelector('#pr-out').innerHTML = `<p class="notice">${esc(link.why || '')}</p>`; });
+    m.el.querySelector('#pr-go').addEventListener('click', async () => {
+      const t = m.el.querySelector('#pr').value.trim(); const out = m.el.querySelector('#pr-out');
+      if (t.length < 10) { KLS.toast('Write a sentence first.'); return; }
+      out.innerHTML = KLS.thinking();
+      try { await KLS.loadScript('shared/coach.js'); const r = await KLS.ai(KLSCoach.P.connection(n, other, link, t)); out.innerHTML = `<div class="coach"><div class="msg ai">${KLS.coachHtml(r)}</div></div>`; }
+      catch (err) { out.innerHTML = `<p class="notice">${esc(err.message)}</p>`; }
+    });
+  });
+})();
+</script>
+</body>
+</html>

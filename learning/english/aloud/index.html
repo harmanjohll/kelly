@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Read aloud</title>
+<meta name="description" content="Read a passage aloud, record it, and get feedback on clarity, pace and expression.">
+<link rel="stylesheet" href="../../shared/studio.css">
+<link rel="icon" href="../../shared/icon.svg" type="image/svg+xml">
+<style>.passage mark { background: color-mix(in srgb, var(--accent-2) 22%, transparent); color: inherit; border-radius: 4px; padding: 0 2px; }</style>
+</head>
+<body data-domain="english" data-tab="practise" data-title="Read aloud" data-back="../">
+<main class="wrap" id="app"></main>
+<script src="../../shared/core.js"></script>
+<script src="../../shared/audio.js"></script>
+<script src="../../shared/content/english.js"></script>
+<script src="../english.js"></script>
+<script>
+(function () {
+  const { $, esc, data, param, playBtn, store, ICON } = KLS;
+  const E = data('english');
+  const app = $('#app');
+  if (!E) { app.innerHTML = '<p class="empty">Still being written.</p>'; return; }
+
+  function one(p) {
+    document.title = p.title;
+    // Highlight the words to watch inside the passage.
+    let html = esc(p.text);
+    (p.watch || []).forEach(w => { const re = new RegExp(`\\b(${w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})\\b`, 'i'); html = html.replace(re, '<mark>$1</mark>'); });
+    const past = store.get().speaking.filter(s => s.kind === 'aloud' && s.ref === p.id).slice(-3).reverse();
+    app.innerHTML = `
+      <div class="page-head"><p class="kicker dom">Read aloud · ${esc(p.level)}</p><h1>${esc(p.title)}</h1></div>
+      <div class="card passage"><p class="prose" style="font-size:1.12rem;line-height:1.8;margin:0">${html}</p></div>
+      <div class="row" style="margin-top:10px"><button class="btn small" data-say="${esc(p.text)}">Hear a model reading</button></div>
+      ${(p.watch || []).length ? `<section><p class="kicker" style="margin-top:18px">Watch these words</p><div class="row">${p.watch.map(w => `<span class="chip">${esc(w)} ${playBtn(w)}</span>`).join('')}</div></section>` : ''}
+      <section><h2>Record your take</h2>
+        <p class="muted small">Read it once silently first. Then record, aiming for clear endings, pauses at commas and full stops, and stress on the words that carry meaning.</p>
+        <div id="rec"></div>
+        <div class="row" style="margin-top:10px"><button class="btn primary dom" id="ask" disabled>Get feedback</button></div>
+        <div class="coach" id="out" style="display:none;margin-top:12px"></div></section>
+      ${past.length ? `<section><h2>Your last takes</h2>${past.map(s => `<details class="drawer"><summary>${new Date(s.iso).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</summary><div class="body"><div class="coach"><div class="msg ai">${KLS.coachHtml(s.feedback)}</div></div></div></details>`).join('')}</section>` : ''}
+      <div class="row" style="margin:24px 0"><a class="btn" href="./">All passages</a></div>`;
+    const r = KLSRec.mount($('#rec'), { maxMs: 90000, label: 'Record', onTake: () => { $('#ask').disabled = false; } });
+    $('#ask').addEventListener('click', () => KLSRec.coachTake($('#out'), r.take, P => P.aloud(p.text), { kind: 'aloud', ref: p.id }));
+  }
+
+  function index() {
+    app.innerHTML = `<div class="page-head"><p class="kicker dom">English</p><h1>Read aloud</h1>
+      <p class="lede">Reading aloud trains enunciation, pace and expression all at once. Record a take, listen back, and let the Coach point at the one thing to change.</p></div>
+      <div class="list">${E.passages.map(p => `<a href="?id=${encodeURIComponent(p.id)}"><span class="grow"><div>${esc(p.title)}</div><div class="sub">${esc(p.level)} · ${p.text.split(/\s+/).length} words</div></span><span class="chev">${ICON.chev}</span></a>`).join('')}</div>`;
+  }
+
+  const p = E.passages.find(x => x.id === param('id'));
+  if (p) one(p); else index();
+})();
+</script>
+</body>
+</html>

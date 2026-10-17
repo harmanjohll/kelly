@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Explore</title>
+<meta name="description" content="The four rooms of the studio and every journey through them.">
+<link rel="stylesheet" href="../shared/studio.css">
+<link rel="icon" href="../shared/icon.svg" type="image/svg+xml">
+</head>
+<body data-tab="explore" data-title="Explore">
+<main class="wrap" id="app"></main>
+<script src="../shared/core.js"></script>
+<script src="../shared/content/philosophy.js"></script>
+<script src="../shared/content/physics.js"></script>
+<script src="../shared/content/psychology.js"></script>
+<script src="../shared/content/english.js"></script>
+<script>
+(function () {
+  const { $, esc, data, allNodes, DOMAINS, ICON, nodeHref, store } = KLS;
+  const S = store.get();
+  const all = allNodes();
+  const saved = Object.keys(S.saved).map(KLS.node).filter(Boolean);
+  $('#app').innerHTML = `
+    <div class="page-head"><h1>Explore</h1><p class="lede">Four rooms, one web. Start anywhere.</p>
+      <div class="search" style="margin-top:14px"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input class="input" id="q" type="search" placeholder="Search every idea, person and word"></div>
+      <div class="list" id="hits" style="margin-top:8px;display:none"></div>
+    </div>
+    <div class="grid">${['philosophy', 'physics', 'psychology', 'english'].map(d => {
+      const D = data(d) || {};
+      return `<a class="card domain-card d-${d}" href="../${DOMAINS[d].href}"><span class="glyph">${ICON[d]}</span><h3>${DOMAINS[d].name}</h3>
+        <p class="muted small" style="margin:0">${esc((D.domain || {}).tagline || DOMAINS[d].blurb)}</p>
+        <span class="count">${d === 'english' ? `${(D.words || []).length} words, ${(D.tricky || []).length} tricky sounds` : `${(D.nodes || []).length} cards, ${(D.modules || []).length} journeys`}</span></a>`;
+    }).join('')}</div>
+    <section style="margin-top:22px">
+      <a class="card" href="../physics/sims/" style="display:flex;gap:14px;align-items:center"><span class="grow" style="flex:1"><h3 style="margin:0">Quantum simulations</h3><span class="muted small">Ten hands on experiments, from the photoelectric effect to a Bell test.</span></span>${ICON.chev}</a>
+    </section>
+    ${saved.length ? `<section><h2>Saved</h2><div class="list">${saved.map(n => `<a href="${nodeHref(n.id)}" class="d-${n.domain}"><span class="dot" style="width:10px;height:10px;border-radius:50%;background:var(--dom);flex:none"></span><span class="grow"><div>${esc(n.title)}</div><div class="sub">${esc(n.line)}</div></span></a>`).join('')}</div></section>` : ''}`;
+  const q = $('#q'), hits = $('#hits');
+  q.addEventListener('input', () => {
+    const t = q.value.trim().toLowerCase();
+    if (t.length < 2) { hits.style.display = 'none'; return; }
+    const res = all.filter(n => n.title.toLowerCase().includes(t)).slice(0, 12)
+      .concat(all.filter(n => !n.title.toLowerCase().includes(t) && (n.line || '').toLowerCase().includes(t)).slice(0, 6));
+    hits.style.display = 'block';
+    hits.innerHTML = res.length ? res.map(n => `<a href="${nodeHref(n.id)}" class="d-${n.domain}"><span class="dot" style="width:10px;height:10px;border-radius:50%;background:var(--dom);flex:none"></span><span class="grow"><div>${esc(n.title)}</div><div class="sub">${esc(DOMAINS[n.domain].name)} · ${esc(n.kindLabel || '')}</div></span></a>`).join('') : '<div class="item muted">No matches.</div>';
+  });
+})();
+</script>
+</body>
+</html>

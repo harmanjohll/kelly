@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Say it right</title>
+<meta name="description" content="Words people often mispronounce, and stress shift pairs.">
+<link rel="stylesheet" href="../../shared/studio.css">
+<link rel="icon" href="../../shared/icon.svg" type="image/svg+xml">
+</head>
+<body data-domain="english" data-tab="practise" data-title="Say it right" data-back="../">
+<main class="wrap" id="app"></main>
+<script src="../../shared/core.js"></script>
+<script src="../../shared/audio.js"></script>
+<script src="../../shared/content/english.js"></script>
+<script src="../english.js"></script>
+<script>
+(function () {
+  const { $, esc, data, param, playBtn, speech, shuffle } = KLS;
+  const E = data('english');
+  const app = $('#app');
+  if (!E) { app.innerHTML = '<p class="empty">Still being written.</p>'; return; }
+
+  function one(t) {
+    document.title = t.word;
+    const i = E.tricky.indexOf(t);
+    const next = E.tricky[(i + 1) % E.tricky.length];
+    app.innerHTML = `
+      <div class="page-head">
+        <p class="kicker dom">Say it right · ${i + 1} of ${E.tricky.length}</p>
+        <div class="spread"><h1 style="margin:0">${esc(t.word)}</h1><div class="row">${playBtn(t.word)}<button class="btn small" data-say="${esc(t.word)}" data-rate="0.7">Slowly</button></div></div>
+        <p class="say" style="font-size:1.1rem;margin:.5rem 0"><span class="respell">${esc(t.respell)}</span><span class="ipa">/${esc(t.ipa)}/</span></p>
+      </div>
+      <div class="card"><p class="kicker">The trap</p><p>${esc(t.trap)}</p><p class="kicker">How to say it</p><p style="margin:0">${esc(t.tip)}</p></div>
+      <section style="margin-top:22px">
+        <h2>Your turn</h2>
+        <p class="muted small">Quick check: say the word and see what your device heard. Or record a take for the Coach to listen to.</p>
+        <div class="row"><button class="btn" id="quick" ${speech.canListen() ? '' : 'disabled'}>Quick check</button><span class="muted small" id="heard">${speech.canListen() ? '' : 'Quick check needs Chrome or Safari.'}</span></div>
+        <div id="rec" style="margin-top:14px"></div>
+        <div class="row" style="margin-top:10px"><button class="btn primary dom" id="ask" disabled>Ask the Coach</button></div>
+        <div class="coach" id="out" style="display:none;margin-top:12px"></div>
+      </section>
+      <div class="row" style="justify-content:space-between;margin:26px 0"><a class="btn" href="./">All words</a><a class="btn primary dom" href="?id=${encodeURIComponent(next.id)}">Next word</a></div>`;
+    const r = KLSRec.mount($('#rec'), { maxMs: 10000, label: 'Record' , onTake: () => { $('#ask').disabled = false; } });
+    $('#ask').addEventListener('click', () => KLSRec.coachTake($('#out'), r.take, P => P.sayWord(t), { kind: 'say', ref: t.id }));
+    $('#quick').addEventListener('click', async () => {
+      const h = $('#heard'); h.textContent = 'Listening...';
+      try {
+        const res = await speech.listen();
+        const target = KLSRec.norm(t.word);
+        const hit = res.alternatives.some(a => KLSRec.norm(a) === target || KLSRec.norm(a).split(' ').includes(target));
+        h.innerHTML = res.transcript ? `Heard <b>${esc(res.transcript)}</b>. ${hit ? 'Recognised.' : 'Not quite the target; listen again and retry.'}` : 'Heard nothing. Try again closer to the mic.';
+      } catch (e) { h.textContent = e.message; }
+    });
+  }
+
+  function index() {
+    app.innerHTML = `
+      <div class="page-head"><p class="kicker dom">English</p><h1>Say it right</h1>
+        <p class="lede">Words fluent speakers trip over. Hear each one, read the respelling (stressed syllable in capitals), then try it.</p>
+        <div class="row" style="margin-top:10px"><a class="btn primary dom" href="?id=${encodeURIComponent(shuffle(E.tricky)[0].id)}">Start with a random word</a></div></div>
+      <section><h2>Tricky words</h2>
+        <div class="search" style="margin:8px 0 10px"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input class="input" id="q" type="search" placeholder="Find a word"></div>
+        <div class="list" id="tl"></div></section>
+      <section><h2>Stress shifts</h2>
+        <p class="muted small">Same spelling, different stress: nouns usually stress the first syllable, verbs the second.</p>
+        <div class="list">${E.stress.map(s => `<div class="item" style="display:block">
+          <div class="spread"><b>${esc(s.word)}</b></div>
+          <div class="row small" style="margin-top:6px"><span class="tag">noun</span><span class="respell" style="font-weight:600">${esc(s.noun)}</span><span class="muted">${esc(s.nounEx)}</span>${playBtn(s.nounEx)}</div>
+          <div class="row small" style="margin-top:6px"><span class="tag">verb</span><span class="respell" style="font-weight:600">${esc(s.verb)}</span><span class="muted">${esc(s.verbEx)}</span>${playBtn(s.verbEx)}</div>
+        </div>`).join('')}</div>
+        <p class="small muted" style="margin-top:8px">Device voices do not always get stress shifts right on their own; the example phrases give them the context they need.</p></section>`;
+    const draw = (q) => { q = (q || '').toLowerCase(); $('#tl').innerHTML = E.tricky.filter(t => !q || t.word.toLowerCase().includes(q)).map(t => `<a href="?id=${encodeURIComponent(t.id)}"><span class="grow"><div>${esc(t.word)}</div><div class="sub">${esc(t.respell)}</div></span>${playBtn(t.word)}</a>`).join(''); };
+    $('#q').addEventListener('input', e => draw(e.target.value));
+    $('#tl').addEventListener('click', e => { if (e.target.closest('[data-say]')) e.preventDefault(); });
+    draw('');
+  }
+
+  const t = E.tricky.find(x => x.id === param('id'));
+  if (t) one(t); else index();
+})();
+</script>
+</body>
+</html>

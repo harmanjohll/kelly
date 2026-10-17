@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mind Web</title>
+<meta name="description" content="See how every idea in the studio connects.">
+<link rel="stylesheet" href="../shared/studio.css">
+<link rel="icon" href="../shared/icon.svg" type="image/svg+xml">
+</head>
+<body class="web-page" data-tab="web" data-title="Mind Web">
+<div class="web-shell">
+  <div class="web-tools">
+    <div class="spread">
+      <div class="seg" role="group" aria-label="View">
+        <button type="button" data-mode="focus">Focus</button>
+        <button type="button" data-mode="overview">Overview</button>
+      </div>
+      <div class="search" style="flex:1;max-width:340px">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <input class="input" id="q" type="search" placeholder="Find an idea" autocomplete="off" style="min-height:40px;padding-top:7px;padding-bottom:7px">
+      </div>
+    </div>
+    <div class="chips" id="domains" role="group" aria-label="Which web"></div>
+    <div class="chips" id="filters" role="group" aria-label="Filter" hidden></div>
+    <div class="web-trail" id="trail" aria-label="Where you have been"></div>
+  </div>
+  <div class="web-stage" id="stage">
+    <div id="results" class="list" style="position:absolute;left:12px;right:12px;top:8px;z-index:6;display:none"></div>
+    <div class="web-legend" id="legend"></div>
+    <div class="web-zoom"><button type="button" id="zin" aria-label="Zoom in">+</button><button type="button" id="zout" aria-label="Zoom out">&minus;</button><button type="button" id="zfit" aria-label="Fit" style="font-size:.8rem">Fit</button></div>
+    <aside class="web-sheet" id="sheet" aria-live="polite"></aside>
+  </div>
+</div>
+<script src="../shared/core.js"></script>
+<script src="../shared/content/philosophy.js"></script>
+<script src="../shared/content/physics.js"></script>
+<script src="../shared/content/psychology.js"></script>
+<script src="../shared/content/english.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="../shared/graph.js"></script>
+<script>
+(function () {
+  const { $, esc, DOMAINS, param, data } = KLS;
+  const stage = $('#stage');
+  let domain = param('d') || 'all';
+  if (domain !== 'all' && !DOMAINS[domain]) domain = 'all';
+  const narrow = innerWidth < 700;
+  let mode = param('mode') || (param('focus') || narrow ? 'focus' : 'overview');
+  let web;
+
+  const DOMS = [['all', 'Everything'], ['philosophy', 'Philosophy'], ['physics', 'Quantum'], ['psychology', 'Psychology'], ['english', 'English']];
+  function drawDomains() {
+    $('#domains').innerHTML = DOMS.map(([id, l]) => `<button class="chip ${id === domain ? 'on' : ''}" data-d="${id}">${l}</button>`).join('');
+    document.body.dataset.domain = domain === 'all' ? '' : domain;
+  }
+  $('#domains').addEventListener('click', e => { const b = e.target.closest('[data-d]'); if (!b || b.dataset.d === domain) return; domain = b.dataset.d; start(null); });
+
+  function legend() {
+    const ds = domain === 'all' ? ['philosophy', 'physics', 'psychology', 'english'] : [domain];
+    $('#legend').innerHTML = ds.map(d => `<span><i style="background:var(${DOMAINS[d].colourVar})"></i>${DOMAINS[d].name}</span>`).join('') +
+      '<span><i style="border:2px solid var(--muted);background:transparent"></i>Person</span><span><i class="dash"></i>Across domains</span>';
+  }
+
+  // Filter chips by kind in a single domain web.
+  let kindOn = null;
+  function drawFilters() {
+    const f = $('#filters');
+    const D = domain !== 'all' && domain !== 'english' ? data(domain) : null;
+    if (!D) { f.hidden = true; return; }
+    f.hidden = false;
+    f.innerHTML = `<button class="chip ${!kindOn ? 'on' : ''}" data-k="">All kinds</button>` +
+      (D.kinds || []).map(k => `<button class="chip ${kindOn === k.id ? 'on' : ''}" data-k="${k.id}">${esc(k.plural || k.label)}</button>`).join('');
+  }
+  $('#filters').addEventListener('click', e => {
+    const b = e.target.closest('[data-k]'); if (!b) return;
+    kindOn = b.dataset.k || null; drawFilters();
+    if (web.mode !== 'overview') { web.setMode('overview'); syncSeg(); }
+    web.setFilter(kindOn ? (n => n.kind === kindOn && !n.foreign) : null);
+  });
+
+  function syncSeg() { document.querySelectorAll('[data-mode]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === web.mode))); }
+  document.querySelectorAll('[data-mode]').forEach(b => b.addEventListener('click', () => { web.setMode(b.dataset.mode); syncSeg(); }));
+
+  function sync(st) {
+    const u = new URL(location.href);
+    u.searchParams.set('d', domain);
+    u.searchParams.set('mode', st.mode);
+    if (st.focus) u.searchParams.set('focus', st.focus); else u.searchParams.delete('focus');
+    history.replaceState(null, '', u);
+  }
+
+  function start(focus) {
+    stage.querySelectorAll('svg').forEach(s => s.remove());
+    $('#sheet').classList.remove('on');
+    kindOn = null;
+    drawDomains(); drawFilters(); legend();
+    web = KLS.Web.mount(stage, { domain, mode, sheet: $('#sheet'), trail: $('#trail'), onChange: sync });
+    stage.insertBefore(stage.querySelector('svg'), stage.firstChild);
+    syncSeg();
+    if (focus) web.select(focus);
+    sync({ mode: web.mode, focus: web.focus });
+  }
+
+  $('#zin').addEventListener('click', () => web.zoomBy(1.4));
+  $('#zout').addEventListener('click', () => web.zoomBy(1 / 1.4));
+  $('#zfit').addEventListener('click', () => web.fit());
+
+  const q = $('#q'), res = $('#results');
+  q.addEventListener('input', () => {
+    const hits = web.search(q.value);
+    res.style.display = hits.length ? 'block' : 'none';
+    res.innerHTML = hits.map(n => `<a href="#" data-hit="${esc(n.id)}"><span class="grow"><div>${esc(n.title)}</div><div class="sub">${esc(n.kindLabel || n.type)} · ${esc((DOMAINS[n.domain] || {}).name || '')}</div></span></a>`).join('');
+  });
+  res.addEventListener('click', e => { const a = e.target.closest('[data-hit]'); if (!a) return; e.preventDefault(); res.style.display = 'none'; q.value = ''; q.blur(); web.select(a.dataset.hit); });
+
+  start(param('focus'));
+})();
+</script>
+</body>
+</html>
