@@ -1,6 +1,6 @@
 # Notes for AI assistants working on the floral site
 
-This project lives in `apps/floral`. Work only inside this folder and run commands from here. Repo wide rules are in the root `CLAUDE.md`.
+This project lives in `floral`. Work only inside this folder and run commands from here. Repo wide rules are in the root `CLAUDE.md`.
 
 - The business belongs to Kelly. Credit all work and story to Kelly. Use they/them for Kelly unless told otherwise.
 - House style for all visible copy: no em dashes or en dashes (tests enforce this), and avoid hyphens in prose. First person singular, as Kelly. See `docs/brand-voice.md`.

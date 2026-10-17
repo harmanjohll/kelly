@@ -8,7 +8,7 @@ Instead of a grid of bouquets, the site starts from what the customer wants to s
 
 ## Run it
 
-From this folder (`apps/floral`):
+From this folder (`floral`):
 
 ```bash
 npm install
