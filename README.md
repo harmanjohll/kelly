@@ -1,30 +1,16 @@
 # Kelly's apps
 
-One repository, several independent projects. Each lives in its own folder under `apps/`, with its own dependencies, tests and deployment.
-
-| Project | Folder | What it is |
+| Folder | Project | Live address |
 |---|---|---|
-| Floral studio | [`apps/floral`](apps/floral) | Kelly's fresh and crochet flower website, with the consultation coach |
+| [`floral/`](floral) | Kelly's floral studio | https://harmanjohll.github.io/kelly/floral/ |
+| [`learning/`](learning) | Kelly's Learning Studio | https://harmanjohll.github.io/kelly/learning/ |
 
-To add a project, create `apps/<name>/` and add a row to this table.
-
-## Working on a project
-
-```bash
-cd apps/floral
-npm install
-npm run dev
-```
+https://harmanjohll.github.io/kelly/ lists both.
 
 ## Hosting
 
-Everything is hosted on **GitHub Pages**, free, from this repo. No other server is needed.
+GitHub Pages, deployed from the `main` branch. No other server.
 
-- Floral site: **https://harmanjohll.github.io/kelly/floral/**
-- The bare address, https://harmanjohll.github.io/kelly/, forwards to the floral site.
-- Every merge to `main` rebuilds and redeploys, through `.github/workflows/pages.yml`.
-- Another app publishes under its own path, e.g. `https://harmanjohll.github.io/kelly/<app-name>/`, by adding a build step to that workflow.
-
-One time setup: in the repo on GitHub, go to **Settings, then Pages**, and set **Source** to **GitHub Actions**.
-
-A custom domain (e.g. `kellyflowers.sg`) can be added later under the same Settings page; the workflow picks up the new address automatically.
+- **Setting:** Settings → Pages → Source: **Deploy from a branch**, Branch: **main**, folder **/ (root)**.
+- **Build:** on every push to `main`, GitHub runs its Jekyll build (Actions → "pages build and deployment"). `_config.yml` keeps source code and notes off the public site.
+- **The repo holds built sites.** Jekyll copies them as they are. The floral site is built from `floral/source/` with `npm run release`, which writes the result into `floral/`. Commit both.
