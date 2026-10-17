@@ -2,13 +2,15 @@
 
 | Folder | Project | Live address |
 |---|---|---|
-| [`learning/`](learning) | Kelly's Learning Studio | https://harmanjohll.github.io/kelly/ |
 | [`floral/`](floral) | Kelly's floral studio | https://harmanjohll.github.io/kelly/floral/ |
+| [`learning/`](learning) | Kelly's Learning Studio | https://harmanjohll.github.io/kelly/learning/ |
+
+https://harmanjohll.github.io/kelly/ lists both.
 
 ## Hosting
 
-GitHub Pages, free, from this repo. No other server.
+GitHub Pages, deployed from the `main` branch. No other server.
 
-- One workflow, `.github/workflows/pages.yml`, publishes both projects on every merge to `main`.
-- One time setup: **Settings → Pages → Source: GitHub Actions**.
-- To check a deploy: **Actions → Deploy to GitHub Pages**. To redeploy by hand: same place, **Run workflow**.
+- **Setting:** Settings → Pages → Source: **Deploy from a branch**, Branch: **main**, folder **/ (root)**.
+- **Build:** on every push to `main`, GitHub runs its Jekyll build (Actions → "pages build and deployment"). `_config.yml` keeps source code and notes off the public site.
+- **The repo holds built sites.** Jekyll copies them as they are. The floral site is built from `floral/source/` with `npm run release`, which writes the result into `floral/`. Commit both.
