@@ -8,14 +8,15 @@ Instead of a grid of bouquets, the site starts from what the customer wants to s
 
 ## Run it
 
-From this folder (`apps/floral`):
+The source lives in `floral/source/`; the built site that GitHub Pages serves lives in `floral/`.
 
 ```bash
+cd floral/source
 npm install
 npm run dev          # http://localhost:4321
 npm test             # unit tests for the coach, rules, card and brief
 npm run test:e2e     # browser tests: five customer journeys, every page, mobile and desktop
-npm run build        # static site in dist/
+npm run release      # build for GitHub Pages into floral/; then commit and push
 ```
 
 ## Where things live
@@ -35,13 +36,15 @@ npm run build        # static site in dist/
 
 Adding a rule needs no code: add an entry to `rules.json` with `when` (all conditions must hold), an `action` (`exclude`, `boost` or `note`), a `match` (any listed property counts) and an `explain` line in Kelly's voice. The unit tests check that every combination of answers still returns three valid pieces.
 
-## Deploy (GitHub Pages)
+## Publish
 
-The repo's workflow (`.github/workflows/pages.yml`) builds this site on every merge to `main` and publishes it at **https://harmanjohll.github.io/kelly/floral/**. It runs the unit tests first and stops if they fail.
+GitHub Pages deploys from `main`. To publish a change:
 
-- **One time setup:** on GitHub, go to Settings, then Pages, and set Source to "GitHub Actions".
-- **Testing locally under the Pages path:** `BASE_PATH=/kelly/floral npm run build`, or `BASE_PATH=/kelly/floral npm run test:e2e`.
-- **Internal links:** always build them with `url()` from `src/lib/url.ts`, never as a bare `/path`, so they work under `/kelly/` and on a custom domain alike.
+1. `npm run release` (from `floral/source`). This builds with the `/kelly/floral` path and replaces the built files in `floral/`.
+2. Commit everything, including `floral/`, and merge to `main`.
+3. GitHub's "pages build and deployment" run finishes in about a minute. The site is https://harmanjohll.github.io/kelly/floral/
+
+Always build internal links with `url()` from `src/lib/url.ts`, never as a bare `/path`, so they work under `/kelly/floral/`. Test that way with `BASE_PATH=/kelly/floral npm run test:e2e`.
 
 ## Before launch
 
