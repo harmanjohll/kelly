@@ -1,7 +1,8 @@
 import { expect, test } from '@playwright/test';
 import products from '../../src/data/products.json' with { type: 'json' };
 
-const pages = ['/', '/consult/', '/fleeting/', '/forever/', '/meanings/', '/kelly/', ...products.map((p) => `/pieces/${p.slug}/`)];
+// Relative to baseURL, so the same tests run at the root or under /kelly/.
+const pages = ['./', 'consult/', 'fleeting/', 'forever/', 'meanings/', 'kelly/', ...products.map((p) => `pieces/${p.slug}/`)];
 
 for (const path of pages) {
   test(`${path} renders cleanly`, async ({ page }) => {
@@ -23,8 +24,19 @@ for (const path of pages) {
 
 test('reduced motion stops the breathing hero', async ({ page }, info) => {
   test.skip(info.project.name !== 'desktop-reduced-motion');
-  await page.goto('/');
+  await page.goto('./');
   expect(await page.evaluate(() => matchMedia('(prefers-reduced-motion: reduce)').matches)).toBe(true);
   const anim = await page.locator('.half-fresh').evaluate((el) => getComputedStyle(el).animationName);
   expect(anim).toBe('none');
+});
+
+test('every internal link resolves', async ({ page, request }, info) => {
+  test.skip(info.project.name !== 'desktop');
+  const seen = new Set<string>();
+  for (const path of pages) {
+    await page.goto(path);
+    const hrefs = await page.locator('a[href]').evaluateAll((as) => as.map((a) => (a as HTMLAnchorElement).href));
+    for (const h of hrefs) if (h.startsWith('http://localhost')) seen.add(h.split('?')[0]);
+  }
+  for (const h of seen) expect((await request.get(h)).status(), h).toBe(200);
 });

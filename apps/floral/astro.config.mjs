@@ -1,8 +1,11 @@
 import { defineConfig } from 'astro/config';
 
-// Static output. Deploys to Cloudflare Pages: build `npm run build`, output `dist`.
+// Static output. GitHub Pages builds set SITE_URL and BASE_PATH (e.g. /kelly) in the
+// deploy workflow; locally and on a custom domain the site runs at the root.
 export default defineConfig({
   output: 'static',
-  site: 'https://kelly.pages.dev',
+  site: process.env.SITE_URL || 'https://harmanjohll.github.io',
+  base: process.env.BASE_PATH || '/',
+  trailingSlash: 'always',
   build: { format: 'directory' },
 });

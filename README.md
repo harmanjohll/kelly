@@ -16,6 +16,14 @@ npm install
 npm run dev
 ```
 
-## Deploying
+## Hosting
 
-Each project deploys separately. In Cloudflare Pages, create one Pages project per app and set **Root directory** to that app's folder (for example `apps/floral`). Each app gets its own address, and a change in one folder never redeploys the other unless you configure it to.
+Everything is hosted on **GitHub Pages**, free, from this repo. No other server is needed.
+
+- Live address: **https://harmanjohll.github.io/kelly/** (the floral site)
+- Every merge to `main` rebuilds and redeploys, through `.github/workflows/pages.yml`.
+- Another app publishes under its own path, e.g. `https://harmanjohll.github.io/kelly/<app-name>/`, by adding a build step to that workflow.
+
+One time setup: in the repo on GitHub, go to **Settings, then Pages**, and set **Source** to **GitHub Actions**.
+
+A custom domain (e.g. `kellyflowers.sg`) can be added later under the same Settings page; the workflow picks up the new address automatically.

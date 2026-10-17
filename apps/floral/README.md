@@ -35,11 +35,13 @@ npm run build        # static site in dist/
 
 Adding a rule needs no code: add an entry to `rules.json` with `when` (all conditions must hold), an `action` (`exclude`, `boost` or `note`), a `match` (any listed property counts) and an `explain` line in Kelly's voice. The unit tests check that every combination of answers still returns three valid pieces.
 
-## Deploy (Cloudflare Pages, free, commercial use allowed)
+## Deploy (GitHub Pages)
 
-1. In Cloudflare: Workers & Pages, then Create, then Pages, then Connect to Git, and pick this repository.
-2. Framework preset: Astro. **Root directory `apps/floral`.** Build command `npm run build`. Output directory `dist`.
-3. Every push to `main` redeploys. To skip rebuilds when only other apps change, set Build watch paths to `apps/floral/*`. Add a custom domain under the project's settings.
+The repo's workflow (`.github/workflows/pages.yml`) builds this site on every merge to `main` and publishes it at **https://harmanjohll.github.io/kelly/**. It runs the unit tests first and stops if they fail.
+
+- **One time setup:** on GitHub, go to Settings, then Pages, and set Source to "GitHub Actions".
+- **Testing locally under the Pages path:** `BASE_PATH=/kelly npm run build`, or `BASE_PATH=/kelly npm run test:e2e`.
+- **Internal links:** always build them with `url()` from `src/lib/url.ts`, never as a bare `/path`, so they work under `/kelly/` and on a custom domain alike.
 
 ## Before launch
 

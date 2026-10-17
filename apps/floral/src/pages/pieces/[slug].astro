@@ -1,4 +1,5 @@
 ---
+import { url } from '../../lib/url';
 import Base from '../../layouts/Base.astro';
 import Art from '../../components/Art.astro';
 import { products } from '../../lib/coach';
@@ -12,7 +13,7 @@ export function getStaticPaths() {
 
 const { product } = Astro.props as { product: Product };
 const lineLabel = { fresh: 'Fresh', forever: 'Crochet', stays: 'Fresh, with one crochet bloom', bespoke: 'Bespoke' }[product.line];
-const back = product.line === 'forever' ? { href: '/forever/', label: 'Forever' } : { href: '/fleeting/', label: 'Fleeting' };
+const back = product.line === 'forever' ? { href: url('/forever/'), label: 'Forever' } : { href: url('/fleeting/'), label: 'Fleeting' };
 const traditionName: Record<string, string> = { victorian: 'Victorian', chinese: 'Chinese', japanese: 'Japanese', malay: 'Malay', indian: 'Indian', singapore: 'Singapore', general: 'Today', care: 'Care' };
 const flowers = product.flowers
   .map((id) => flowerData.flowers.find((f) => f.id === id))
@@ -37,7 +38,7 @@ const lead = product.line === 'forever' ? site.crochet.leadNote : product.line =
       <p class="price">{product.priceFrom ? `From S$${product.priceFrom}` : 'Price on request'}</p>
       <div class="actions">
         <a class="btn" href={ask} rel="noopener">Ask Kelly</a>
-        <a class="btn ghost" href="/consult/">Help me choose</a>
+        <a class="btn ghost" href={url('/consult/')}>Help me choose</a>
       </div>
       <p class="small muted">{lead}</p>
 
@@ -60,7 +61,7 @@ const lead = product.line === 'forever' ? site.crochet.leadNote : product.line =
               </div>
             ))}
           </div>
-          <p class="small muted">Meanings vary between families and sources. <a href="/meanings/">More on meanings</a></p>
+          <p class="small muted">Meanings vary between families and sources. <a href={url('/meanings/')}>More on meanings</a></p>
         </>
       )}
     </div>

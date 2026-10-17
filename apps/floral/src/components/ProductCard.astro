@@ -1,11 +1,12 @@
 ---
+import { url } from '../lib/url';
 import Art from './Art.astro';
 import type { Product } from '../lib/types';
 interface Props { product: Product; wide?: boolean }
 const { product, wide = false } = Astro.props;
 const lineLabel = { fresh: 'Fresh', forever: 'Crochet', stays: 'Fresh with one crochet bloom', bespoke: 'Bespoke' }[product.line];
 ---
-<a class:list={['card reveal', { wide }]} href={`/pieces/${product.slug}/`}>
+<a class:list={['card reveal', { wide }]} href={url(`/pieces/${product.slug}/`)}>
   <Art product={product} />
   <div class="meta">
     <h3>{product.name}</h3>
