@@ -147,7 +147,11 @@ for (const d of ALL) {
   for (const a of ANCHORS[P].split(' ')) if (!seen.has(`${P}.${a}`)) err(`${d}: missing anchor ${P}.${a}`);
   for (const m of D.modules || []) {
     prose(`${d} module ${m.id}`, m.blurb);
-    for (const id of m.path || []) if (!seen.has(id) && !ids.has(id)) err(`${d} module ${m.id}: unknown ${id}`);
+    for (const id of m.path || []) {
+      if (seen.has(id) || ids.has(id)) continue;
+      if (anchorIds.has(id) && !id.startsWith(P + '.')) warn(`${d} module ${m.id}: anchor ${id} not yet present`);
+      else err(`${d} module ${m.id}: unknown ${id}`);
+    }
   }
   console.log(`${d}: ${(D.nodes || []).length} nodes, ${(D.modules || []).length} modules`);
 }
