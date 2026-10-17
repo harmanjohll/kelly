@@ -1,0 +1,91 @@
+---
+import Base from '../../layouts/Base.astro';
+import Art from '../../components/Art.astro';
+import { products } from '../../lib/coach';
+import { waLink, site } from '../../config/site';
+import flowerData from '../../data/flowers.json';
+import type { Product } from '../../lib/types';
+
+export function getStaticPaths() {
+  return products.map((product) => ({ params: { slug: product.slug }, props: { product } }));
+}
+
+const { product } = Astro.props as { product: Product };
+const lineLabel = { fresh: 'Fresh', forever: 'Crochet', stays: 'Fresh, with one crochet bloom', bespoke: 'Bespoke' }[product.line];
+const back = product.line === 'forever' ? { href: '/forever/', label: 'Forever' } : { href: '/fleeting/', label: 'Fleeting' };
+const traditionName: Record<string, string> = { victorian: 'Victorian', chinese: 'Chinese', japanese: 'Japanese', malay: 'Malay', indian: 'Indian', singapore: 'Singapore', general: 'Today', care: 'Care' };
+const flowers = product.flowers
+  .map((id) => flowerData.flowers.find((f) => f.id === id))
+  .filter((f): f is (typeof flowerData.flowers)[number] => !!f)
+  .map((f) => ({ name: f.name, meanings: Object.entries(f.meanings).filter(([k, v]) => typeof v === 'string' && k !== 'verify') as [string, string][] }));
+const ask = waLink(`Hello Kelly, I'd like to ask about ${product.name}.`);
+const fresh = `Delivered ${site.fresh.deliveryDays.join(' or ')}; order by ${site.fresh.orderBy}.`;
+const lead = product.line === 'forever' ? site.crochet.leadNote : product.line === 'stays' ? `${fresh} Please allow ${product.leadDays} days so the crochet bloom can be made.` : fresh;
+---
+<Base title={product.name} description={product.summary}>
+  <article class="piece wrap">
+    <div class="art-col">
+      <Art product={product} />
+      <p class="small muted caption">An illustration. Kelly's photographs of this piece are coming.</p>
+    </div>
+    <div class="text-col">
+      <p class="small"><a href={back.href}>{back.label}</a></p>
+      <h1>{product.name}</h1>
+      <p class="muted line">{lineLabel}</p>
+      <p class="summary">{product.summary}</p>
+      <p>{product.story}</p>
+      <p class="price">{product.priceFrom ? `From S$${product.priceFrom}` : 'Price on request'}</p>
+      <div class="actions">
+        <a class="btn" href={ask} rel="noopener">Ask Kelly</a>
+        <a class="btn ghost" href="/consult/">Help me choose</a>
+      </div>
+      <p class="small muted">{lead}</p>
+
+      <h2>How it lives</h2>
+      <dl>
+        <div><dt>Lasts</dt><dd>{product.lifespan}</dd></div>
+        <div><dt>Care</dt><dd>{product.care}</dd></div>
+        <div><dt>Size</dt><dd>{product.size}</dd></div>
+        {product.makeHours && <div><dt>Made</dt><dd>About {product.makeHours} hours of crochet, in {product.yarn?.toLowerCase()}</dd></div>}
+      </dl>
+
+      {flowers.length > 0 && (
+        <>
+          <h2>What the flowers say</h2>
+          <div class="meanings">
+            {flowers.map((f) => (
+              <div>
+                <h3>{f.name}</h3>
+                {f.meanings.map(([k, v]) => <p><span class="muted small">{traditionName[k] ?? k}</span> {v}</p>)}
+              </div>
+            ))}
+          </div>
+          <p class="small muted">Meanings vary between families and sources. <a href="/meanings/">More on meanings</a></p>
+        </>
+      )}
+    </div>
+  </article>
+</Base>
+
+<style>
+  .piece { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 5vw, 5rem); padding-top: clamp(1.5rem, 4vw, 3rem); align-items: start; }
+  .art-col { position: sticky; top: 1.5rem; }
+  .caption { margin-top: 0.75rem; }
+  h1 { margin: 0.5rem 0 0.4rem; }
+  .line { margin-bottom: 1.5rem; }
+  .summary { font-size: 1.2rem; }
+  .price { font-family: var(--serif); font-size: 1.5rem; margin: 1.5rem 0 1rem; }
+  .actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 0.75rem; }
+  h2 { font-size: 1.9rem; margin: 3rem 0 1.25rem; }
+  dl { margin: 0; display: grid; gap: 0.9rem; }
+  dl div { display: grid; grid-template-columns: 5rem 1fr; gap: 1rem; }
+  dt { color: var(--ink-2); font-size: 0.875rem; padding-top: 0.15rem; }
+  dd { margin: 0; }
+  .meanings { display: grid; gap: 1.25rem; margin-bottom: 1rem; }
+  .meanings h3 { font-size: 1.35rem; margin-bottom: 0.3rem; }
+  .meanings p { margin: 0 0 0.3rem; }
+  @media (max-width: 860px) {
+    .piece { grid-template-columns: 1fr; }
+    .art-col { position: static; max-width: 460px; }
+  }
+</style>

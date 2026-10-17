@@ -1,0 +1,516 @@
+---
+import Base from '../layouts/Base.astro';
+import { intentions } from '../lib/coach';
+import { labels } from '../lib/brief';
+import { site } from '../config/site';
+
+const relationships = Object.entries(labels.relationship).filter(([k]) => k !== 'self');
+const settings = Object.entries(labels.setting);
+const cultures = Object.entries(labels.culture);
+const palettes = [
+  { id: 'soft', label: 'Soft', note: 'blush, cream' },
+  { id: 'bright', label: 'Bright', note: 'sunny, joyful' },
+  { id: 'deep', label: 'Deep', note: 'rich, romantic' },
+  { id: 'white', label: 'White', note: 'calm, pure' },
+  { id: 'green', label: 'Green', note: 'natural, quiet' },
+];
+const lifespans = [
+  { id: 'fleeting', label: 'A week', note: 'Fresh flowers, at their best now' },
+  { id: 'forever', label: 'A lifetime', note: 'Crochet flowers, kept for years' },
+  { id: 'both', label: 'Both', note: 'Fresh, with one crochet bloom that stays' },
+  { id: 'unsure', label: "I'm not sure", note: "I'll show you some of each" },
+];
+const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+---
+<Base title="Help me choose" description="Six short questions, then three suggestions from Kelly with reasons, and a card message you can make your own.">
+  <div class="consult wrap" data-whatsapp-placeholder={site.whatsappIsPlaceholder ? 'true' : 'false'}>
+    <div class="progress" aria-hidden="true"><span class="bar"></span></div>
+    <p class="count small muted" aria-live="polite"></p>
+
+    <noscript><p>The consultation needs JavaScript. You can still <a href="/fleeting/">browse fresh pieces</a> or <a href="/forever/">crochet pieces</a>.</p></noscript>
+
+    <form id="consult" novalidate>
+      <section class="step" data-step="say">
+        <fieldset>
+          <legend><h1 tabindex="-1">What would you like to say?</h1></legend>
+          <div class="choices tall">
+            {intentions.map((i) => (
+              <label class="choice">
+                <input type="radio" name="intention" value={i.id} />
+                <span class="c-title">{i.say}</span>
+                <span class="c-note">{i.hint}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      </section>
+
+      <section class="step" data-step="who" hidden>
+        <fieldset>
+          <legend><h1 tabindex="-1">Who are they to you?</h1></legend>
+          <div class="choices">
+            {relationships.map(([id, label]) => (
+              <label class="choice"><input type="radio" name="relationship" value={id} /><span class="c-title">{cap(label)}</span></label>
+            ))}
+          </div>
+        </fieldset>
+        <div class="field">
+          <label for="name">Their name, for the card <span class="muted">(optional)</span></label>
+          <input id="name" name="name" type="text" autocomplete="off" maxlength="40" />
+        </div>
+        <div class="nav"><button type="button" class="btn ghost back">Back</button><button type="button" class="btn next" data-requires="relationship">Continue</button></div>
+      </section>
+
+      <section class="step" data-step="context" hidden>
+        <h1 tabindex="-1">Where will they be, and is there anything I should know?</h1>
+        <fieldset>
+          <legend class="sub">Where the flowers are going</legend>
+          <div class="choices">
+            {settings.map(([id, label]) => (
+              <label class="choice"><input type="radio" name="setting" value={id} /><span class="c-title">{cap(label)}</span></label>
+            ))}
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend class="sub">Anything in the home <span class="muted">(choose any)</span></legend>
+          <div class="choices">
+            <label class="choice"><input type="checkbox" name="household" value="allergies" /><span class="c-title">Allergies</span></label>
+            <label class="choice"><input type="checkbox" name="household" value="pets" /><span class="c-title">Cats or other pets</span></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend class="sub">Their family background <span class="muted">(optional, so I can respect its customs)</span></legend>
+          <div class="choices">
+            {cultures.map(([id, label]) => (
+              <label class="choice"><input type="radio" name="culture" value={id} /><span class="c-title">{cap(label)}</span></label>
+            ))}
+          </div>
+        </fieldset>
+        <div class="nav"><button type="button" class="btn ghost back">Back</button><button type="button" class="btn next" data-requires="setting">Continue</button></div>
+      </section>
+
+      <section class="step" data-step="last" hidden>
+        <fieldset>
+          <legend><h1 tabindex="-1">Should this last a week, or a lifetime?</h1></legend>
+          <div class="choices tall">
+            {lifespans.map((l) => (
+              <label class="choice"><input type="radio" name="lifespan" value={l.id} /><span class="c-title">{l.label}</span><span class="c-note">{l.note}</span></label>
+            ))}
+          </div>
+        </fieldset>
+      </section>
+
+      <section class="step" data-step="feel" hidden>
+        <h1 tabindex="-1">What should it feel like?</h1>
+        <fieldset>
+          <legend class="sub">Colour</legend>
+          <div class="choices">
+            {palettes.map((p) => (
+              <label class="choice swatch-choice"><input type="radio" name="palette" value={p.id} /><span class={`swatch sw-${p.id}`} aria-hidden="true"></span><span class="c-title">{p.label}</span><span class="c-note">{p.note}</span></label>
+            ))}
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend class="sub">Budget</legend>
+          <div class="choices">
+            {Object.entries(site.budgets).map(([id, label]) => (
+              <label class="choice"><input type="radio" name="budget" value={id} /><span class="c-title">{label}</span></label>
+            ))}
+          </div>
+        </fieldset>
+        <div class="nav"><button type="button" class="btn ghost back">Back</button><button type="button" class="btn next" data-requires="palette budget">Continue</button></div>
+      </section>
+
+      <section class="step" data-step="when" hidden>
+        <h1 tabindex="-1">When do you need them?</h1>
+        <div class="field">
+          <label for="date">Date</label>
+          <input id="date" name="date" type="date" />
+          <label class="inline"><input type="checkbox" name="nodate" /> No fixed date</label>
+        </div>
+        <div class="field">
+          <label for="detail">Tell me one true thing about them <span class="muted">(optional, it helps me write the card)</span></label>
+          <textarea id="detail" name="detail" rows="2" maxlength="160" placeholder="they find peace in their garden"></textarea>
+        </div>
+        <div class="nav"><button type="button" class="btn ghost back">Back</button><button type="button" class="btn next show" data-requires="date">Show me</button></div>
+      </section>
+    </form>
+
+    <section class="result" hidden aria-labelledby="result-h">
+      <h1 id="result-h" tabindex="-1">Here's what I'd choose.</h1>
+      <div class="notes" hidden></div>
+      <div class="picks"></div>
+      <details class="trail">
+        <summary>How I chose</summary>
+        <ol></ol>
+      </details>
+
+      <div class="touches">
+        <h2>Make it yours</h2>
+        <fieldset>
+          <legend class="sub">Ribbon</legend>
+          <div class="choices ribbons">
+            {['Sage', 'Blush', 'Ivory', 'Ink'].map((r, i) => (
+              <label class="choice swatch-choice"><input type="radio" name="ribbon" value={r} checked={i === 0} /><span class={`swatch rb-${r.toLowerCase()}`} aria-hidden="true"></span><span class="c-title">{r}</span></label>
+            ))}
+          </div>
+        </fieldset>
+        <label class="keepsake inline" hidden><input type="checkbox" name="keepsake" /> Add one crochet bloom that stays, after the fresh flowers fade</label>
+
+        <div class="field card-field">
+          <label for="card">Your card</label>
+          <div class="drafts" role="group" aria-label="Card drafts"></div>
+          <textarea id="card" rows="3" maxlength="300"></textarea>
+        </div>
+      </div>
+
+      <div class="send">
+        <a class="btn send-btn" href="#" target="_blank" rel="noopener">Send to Kelly</a>
+        <p class="small muted">This opens WhatsApp with your brief written out. Nothing is sent until you press send. Kelly reads every brief personally, replies to confirm price and delivery, then sends a PayNow request.</p>
+        <p class="small placeholder-note" hidden>Preview: Kelly's WhatsApp number isn't set yet, so this link won't reach anyone.</p>
+        <button type="button" class="restart small">Start again</button>
+      </div>
+    </section>
+  </div>
+</Base>
+
+<script>
+  import { consult, intentionDef } from '../lib/coach';
+  import { cardDrafts } from '../lib/card';
+  import { briefLink } from '../lib/brief';
+  import { artFor } from '../lib/bloom';
+  import { track } from '../lib/track';
+  import type { Answers, CoachResult, Product } from '../lib/types';
+
+  const root = document.querySelector<HTMLElement>('.consult')!;
+  const form = document.querySelector<HTMLFormElement>('#consult')!;
+  const steps = [...form.querySelectorAll<HTMLElement>('.step')];
+  const result = root.querySelector<HTMLElement>('.result')!;
+  const bar = root.querySelector<HTMLElement>('.bar')!;
+  const count = root.querySelector<HTMLElement>('.count')!;
+  const KEY = 'kelly-consult';
+  const lineLabel: Record<string, string> = { fresh: 'Fresh', forever: 'Crochet', stays: 'Fresh with one crochet bloom', bespoke: 'Made for you' };
+
+  let current = 0;
+  let outcome: CoachResult | null = null;
+  let chosen: Product | null = null;
+  let started = false;
+
+  const today = new Date();
+  const dateInput = form.querySelector<HTMLInputElement>('#date')!;
+  dateInput.min = today.toISOString().slice(0, 10);
+
+  function val(name: string): string | undefined {
+    const el = form.querySelector<HTMLInputElement>(`[name="${name}"]:checked`);
+    return el?.value || undefined;
+  }
+
+  function answers(): Answers {
+    const a: Answers = {
+      intention: val('intention') as Answers['intention'],
+      relationship: val('relationship') as Answers['relationship'],
+      setting: val('setting') as Answers['setting'],
+      household: [...form.querySelectorAll<HTMLInputElement>('[name="household"]:checked')].map((x) => x.value) as Answers['household'],
+      culture: val('culture') as Answers['culture'],
+      lifespan: val('lifespan') as Answers['lifespan'],
+      palette: val('palette') as Answers['palette'],
+      budget: val('budget') as Answers['budget'],
+      date: dateInput.value || undefined,
+      name: (form.querySelector<HTMLInputElement>('#name')!.value || '').trim() || undefined,
+      detail: (form.querySelector<HTMLTextAreaElement>('#detail')!.value || '').trim() || undefined,
+    };
+    if (a.intention === 'self') a.relationship = 'self';
+    return a;
+  }
+
+  function visibleSteps(): HTMLElement[] {
+    return steps.filter((s) => !(s.dataset.step === 'who' && val('intention') === 'self'));
+  }
+
+  function setRegister() {
+    const def = intentionDef(val('intention') as Answers['intention']);
+    document.body.dataset.register = def?.register ?? 'open';
+  }
+
+  function show(index: number, focus = true) {
+    const list = visibleSteps();
+    current = Math.max(0, Math.min(index, list.length - 1));
+    steps.forEach((s) => (s.hidden = s !== list[current]));
+    result.hidden = true;
+    form.hidden = false;
+    bar.style.transform = `scaleX(${(current + 1) / (list.length + 1)})`;
+    count.textContent = `${current + 1} of ${list.length}`;
+    if (focus) list[current].querySelector<HTMLElement>('h1')?.focus({ preventScroll: true });
+    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+    save();
+  }
+
+  function ready(step: HTMLElement): boolean {
+    const btn = step.querySelector<HTMLButtonElement>('.next');
+    if (!btn) return true;
+    return (btn.dataset.requires ?? '').split(' ').filter(Boolean).every((r) => {
+      if (r === 'date') return !!dateInput.value || !!form.querySelector<HTMLInputElement>('[name="nodate"]:checked');
+      return !!val(r);
+    });
+  }
+
+  function refreshButtons() {
+    steps.forEach((s) => {
+      const btn = s.querySelector<HTMLButtonElement>('.next');
+      if (btn) btn.disabled = !ready(s);
+    });
+  }
+
+  function save() {
+    try {
+      const data: Record<string, unknown> = { step: current, done: !result.hidden };
+      new FormData(form).forEach((v, k) => {
+        data[k] = data[k] ? ([] as unknown[]).concat(data[k], v) : v;
+      });
+      sessionStorage.setItem(KEY, JSON.stringify(data));
+    } catch { /* storage can be unavailable; the consultation still works */ }
+  }
+
+  function restore(): { step: number; done: boolean } | null {
+    try {
+      const raw = sessionStorage.getItem(KEY);
+      if (!raw) return null;
+      const data = JSON.parse(raw);
+      for (const [k, v] of Object.entries(data)) {
+        if (k === 'step' || k === 'done') continue;
+        for (const value of ([] as unknown[]).concat(v)) {
+          const el = form.querySelector<HTMLInputElement>(`[name="${k}"][value="${value}"]`);
+          if (el) el.checked = true;
+          else {
+            const field = form.querySelector<HTMLInputElement>(`[name="${k}"]`);
+            if (field && field.type !== 'radio' && field.type !== 'checkbox') field.value = String(value);
+          }
+        }
+      }
+      return { step: Number(data.step) || 0, done: !!data.done };
+    } catch { return null; }
+  }
+
+  // Single choice questions move on by themselves; a short pause lets the choice register.
+  form.addEventListener('change', (e) => {
+    const t = e.target as HTMLInputElement;
+    if (!started) { started = true; track('consult_started'); }
+    if (t.name === 'intention') setRegister();
+    if (t.name === 'nodate' && t.checked) dateInput.value = '';
+    if (t.name === 'date' && t.value) form.querySelector<HTMLInputElement>('[name="nodate"]')!.checked = false;
+    refreshButtons();
+    save();
+    const step = t.closest<HTMLElement>('.step')!;
+    if (t.type === 'radio' && !step.querySelector('.next')) {
+      const tempo = parseFloat(getComputedStyle(document.body).getPropertyValue('--tempo')) || 1;
+      setTimeout(() => show(current + 1), 280 * tempo);
+    }
+  });
+  form.addEventListener('input', () => { refreshButtons(); save(); });
+
+  form.addEventListener('click', (e) => {
+    const t = e.target as HTMLElement;
+    if (t.closest('.back')) show(current - 1);
+    const next = t.closest<HTMLButtonElement>('.next');
+    if (next && !next.disabled) {
+      if (next.classList.contains('show')) reveal();
+      else show(current + 1);
+    }
+  });
+  form.addEventListener('submit', (e) => e.preventDefault());
+
+  function esc(s: string): string {
+    return s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
+  }
+
+  function reveal(focus = true) {
+    const a = answers();
+    outcome = consult(a, { today });
+    chosen = outcome.picks[0].product;
+    form.hidden = true;
+    result.hidden = false;
+    bar.style.transform = 'scaleX(1)';
+    count.textContent = '';
+
+    const heading = result.querySelector<HTMLElement>('#result-h')!;
+    heading.textContent = outcome.register === 'quiet' ? 'Here is what I would send.' : "Here's what I'd choose.";
+
+    const notes = result.querySelector<HTMLElement>('.notes')!;
+    notes.hidden = outcome.notes.length === 0;
+    notes.innerHTML = outcome.notes.map((n) => `<p>${esc(n)}</p>`).join('');
+
+    result.querySelector('.picks')!.innerHTML = outcome.picks.map((p, i) => `
+      <label class="pick${i === 0 ? ' first' : ''}" style="--i:${i}">
+        <input type="radio" name="pick" value="${p.product.slug}" ${i === 0 ? 'checked' : ''} />
+        <span class="pick-art">${artFor(p.product)}</span>
+        <span class="pick-meta">
+          <span class="pick-rank small muted">${i === 0 ? 'My first choice' : 'Also lovely'}</span>
+          <span class="pick-name">${esc(p.product.name)}</span>
+          <span class="small muted">${lineLabel[p.product.line]}</span>
+          <span class="pick-reason">${esc(p.reason)}</span>
+          ${p.product.line !== 'bespoke' ? `<a class="small" href="/pieces/${p.product.slug}/" target="_blank" rel="noopener">More about this piece</a>` : ''}
+        </span>
+      </label>`).join('');
+
+    result.querySelector('.trail ol')!.innerHTML = outcome.trail.map((t) => `<li>${esc(t)}</li>`).join('');
+
+    const drafts = cardDrafts(a);
+    const card = result.querySelector<HTMLTextAreaElement>('#card')!;
+    card.value = drafts[0] ?? '';
+    result.querySelector('.drafts')!.innerHTML = drafts.map((d, i) =>
+      `<button type="button" class="draft${i === 0 ? ' on' : ''}" aria-pressed="${i === 0}">${esc(d)}</button>`).join('');
+
+    updateTouches();
+    updateLink();
+    track('consult_completed', { intention: a.intention ?? '' });
+    save();
+    try { const raw = JSON.parse(sessionStorage.getItem(KEY) || '{}'); raw.done = true; sessionStorage.setItem(KEY, JSON.stringify(raw)); } catch { /* ignore */ }
+    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+    if (focus) heading.focus({ preventScroll: true });
+  }
+
+  function updateTouches() {
+    const keep = result.querySelector<HTMLElement>('.keepsake')!;
+    keep.hidden = chosen?.line !== 'fresh';
+    if (keep.hidden) keep.querySelector<HTMLInputElement>('input')!.checked = false;
+  }
+
+  function updateLink() {
+    if (!outcome || !chosen) return;
+    const others = outcome.picks.map((p) => p.product).filter((p) => p !== chosen);
+    const ribbon = result.querySelector<HTMLInputElement>('[name="ribbon"]:checked')?.value;
+    const keepsake = !!result.querySelector<HTMLInputElement>('[name="keepsake"]:checked');
+    const card = result.querySelector<HTMLTextAreaElement>('#card')!.value;
+    result.querySelector<HTMLAnchorElement>('.send-btn')!.href = briefLink({ answers: answers(), chosen, others, touches: { ribbon, keepsake }, card });
+  }
+
+  result.addEventListener('change', (e) => {
+    const t = e.target as HTMLInputElement;
+    if (t.name === 'pick' && outcome) {
+      chosen = outcome.picks.find((p) => p.product.slug === t.value)!.product;
+      updateTouches();
+    }
+    updateLink();
+  });
+  result.addEventListener('input', updateLink);
+  result.addEventListener('click', (e) => {
+    const t = e.target as HTMLElement;
+    const d = t.closest<HTMLButtonElement>('.draft');
+    if (d) {
+      result.querySelectorAll('.draft').forEach((b) => { b.classList.toggle('on', b === d); b.setAttribute('aria-pressed', String(b === d)); });
+      result.querySelector<HTMLTextAreaElement>('#card')!.value = d.textContent ?? '';
+      updateLink();
+    }
+    if (t.closest('.send-btn')) track('brief_sent', { intention: val('intention') ?? '' });
+    if (t.closest('.restart')) {
+      form.reset();
+      try { sessionStorage.removeItem(KEY); } catch { /* ignore */ }
+      document.body.dataset.register = 'open';
+      refreshButtons();
+      show(0);
+    }
+  });
+
+  if (root.dataset.whatsappPlaceholder === 'true') result.querySelector<HTMLElement>('.placeholder-note')!.hidden = false;
+
+  // Arriving from the landing page with ?say=sorry starts at the second question.
+  const say = new URLSearchParams(location.search).get('say');
+  const saved = restore();
+  setRegister();
+  refreshButtons();
+  if (say && form.querySelector(`[name="intention"][value="${say}"]`)) {
+    form.querySelector<HTMLInputElement>(`[name="intention"][value="${say}"]`)!.checked = true;
+    setRegister();
+    started = true;
+    track('consult_started', { from: 'landing' });
+    show(1, false);
+  } else if (saved?.done && val('intention')) {
+    reveal(false);
+  } else {
+    show(saved?.step ?? 0, false);
+  }
+</script>
+
+<style is:global>
+  .consult { max-width: 820px; padding-top: 1.5rem; }
+  .consult .progress { height: 2px; background: var(--line); overflow: hidden; border-radius: 2px; }
+  .consult .bar { display: block; height: 100%; background: var(--accent); transform-origin: left; transform: scaleX(0); transition: transform calc(0.6s * var(--tempo)) var(--ease); }
+  .consult .count { margin: 0.75rem 0 2rem; min-height: 1.5em; }
+  .consult fieldset { border: 0; padding: 0; margin: 0 0 2rem; min-width: 0; }
+  .consult legend { padding: 0; margin-bottom: 1.5rem; }
+  .consult .step h1, .consult .result h1 { font-size: clamp(2.2rem, 5vw, 3.4rem); margin-bottom: 1.75rem; outline: none; }
+  .consult legend h1 { margin-bottom: 0 !important; }
+  .consult .sub { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.9rem; }
+
+  .consult .choices { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+  .consult .choices.tall { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+  .consult .choice { position: relative; display: inline-flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; min-height: 48px; padding: 0.6rem 1.2rem; border: 1px solid var(--line); border-radius: var(--pill); cursor: pointer; transition: border-color 0.2s ease, background-color 0.2s ease; }
+  .consult .choices.tall .choice { display: grid; gap: 0.15rem; border-radius: var(--edge); padding: 1rem 1.25rem; align-content: start; }
+  .consult .choice input { position: absolute; opacity: 0; pointer-events: none; }
+  .consult .choice:hover { border-color: var(--ink); }
+  .consult .choice:has(input:checked) { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 9%, var(--paper)); }
+  .consult .choice:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .consult .c-title { font-weight: 500; }
+  .consult .choices.tall .c-title { font-family: var(--serif); font-size: 1.5rem; font-weight: 500; line-height: 1.2; }
+  .consult .c-note { color: var(--ink-2); font-size: 0.875rem; }
+  .consult .swatch-choice .c-note { width: 100%; padding-left: calc(18px + 0.6rem); margin-top: -0.4rem; display: none; }
+  .consult .swatch { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--line); flex: none; }
+  .consult .sw-soft { background: linear-gradient(135deg, var(--bloom-blush), #f3e3d6); }
+  .consult .sw-bright { background: linear-gradient(135deg, var(--bloom-sun), #e9894f); }
+  .consult .sw-deep { background: linear-gradient(135deg, var(--bloom-wine), #4b1d36); }
+  .consult .sw-white { background: linear-gradient(135deg, #fbfbf7, var(--bloom-ivory)); }
+  .consult .sw-green { background: linear-gradient(135deg, var(--bloom-sage), #5f7466); }
+  .consult .rb-sage { background: var(--bloom-sage); } .consult .rb-blush { background: var(--bloom-blush); } .consult .rb-ivory { background: #f4f1e6; } .consult .rb-ink { background: #18221d; }
+
+  .consult .field { display: grid; gap: 0.5rem; margin-bottom: 1.75rem; }
+  .consult .field > label:first-child { font-weight: 600; font-size: 0.95rem; }
+  .consult input[type='text'], .consult input[type='date'], .consult textarea { font: inherit; color: var(--ink); background: var(--paper); border: 1px solid var(--ink-2); border-radius: var(--edge); padding: 0.75rem 0.9rem; width: 100%; max-width: 32rem; }
+  .consult textarea { resize: vertical; }
+  .consult ::placeholder { color: var(--ink-2); opacity: 1; }
+  .consult .inline { display: inline-flex; gap: 0.6rem; align-items: center; cursor: pointer; }
+  .consult .inline input { width: 18px; height: 18px; accent-color: var(--accent); }
+  .consult .nav { display: flex; gap: 0.75rem; margin-top: 0.5rem; }
+
+  .consult .notes { background: var(--paper-2); border-left: 2px solid var(--accent); padding: 1.1rem 1.4rem; margin-bottom: 2rem; }
+  .consult .notes p:last-child { margin-bottom: 0; }
+
+  .consult .picks { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 1.25rem; align-items: start; }
+  .consult .pick { display: grid; gap: 1rem; cursor: pointer; position: relative; }
+  .consult .pick input { position: absolute; opacity: 0; }
+  .consult .pick-art { display: grid; background: var(--paper-2); border-radius: var(--edge); aspect-ratio: 8 / 9; padding: 6% 8% 2%; outline: 1px solid transparent; transition: outline-color 0.2s ease; }
+  .consult .pick-art svg { width: 100%; height: 100%; }
+  .consult .pick:has(input:checked) .pick-art { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .consult .pick:has(input:focus-visible) .pick-art { outline: 2px dashed var(--accent); outline-offset: 3px; }
+  .consult .pick-meta { display: grid; gap: 0.25rem; }
+  .consult .pick-name { font-family: var(--serif); font-size: 1.6rem; line-height: 1.15; }
+  .consult .first .pick-name { font-size: 2rem; }
+  .consult .pick-reason { margin-top: 0.4rem; }
+  @media (prefers-reduced-motion: no-preference) {
+    .consult .pick { animation: rise calc(0.9s * var(--tempo)) var(--ease) both; animation-delay: calc(var(--i) * 140ms * var(--tempo)); }
+    @keyframes rise { from { opacity: 0; transform: translateY(16px); } }
+  }
+
+  .consult .trail { margin: 2.5rem 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 1rem 0; }
+  .consult .trail summary { cursor: pointer; font-weight: 500; }
+  .consult .trail ol { margin: 1rem 0 0; padding-left: 1.25rem; color: var(--ink-2); display: grid; gap: 0.4rem; }
+
+  .consult .touches h2 { margin-bottom: 1.5rem; }
+  .consult .keepsake { margin: -0.5rem 0 1.75rem; }
+  .consult .drafts { display: grid; gap: 0.5rem; margin-bottom: 0.25rem; }
+  .consult .draft { text-align: left; font: inherit; font-family: var(--serif); font-size: 1.2rem; line-height: 1.35; color: var(--ink); background: none; border: 1px solid var(--line); border-radius: var(--edge); padding: 0.75rem 1rem; cursor: pointer; }
+  .consult .draft.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 7%, var(--paper)); }
+  .consult #card { font-family: var(--serif); font-size: 1.25rem; max-width: none; }
+
+  .consult .send { margin-top: 1rem; padding-top: 2rem; border-top: 1px solid var(--line); display: grid; gap: 0.75rem; justify-items: start; }
+  .consult .send-btn { min-width: 14rem; }
+  .consult .send p { margin: 0; }
+  .consult .placeholder-note { color: var(--accent); }
+  .consult .restart { background: none; border: 0; padding: 0; color: var(--ink-2); text-decoration: underline; cursor: pointer; font: inherit; font-size: 0.875rem; }
+
+  @media (max-width: 760px) {
+    .consult .choices.tall { grid-template-columns: 1fr; }
+    .consult .picks { grid-template-columns: 1fr 1fr; }
+    .consult .first { grid-column: 1 / -1; }
+    .consult .swatch-choice .c-note { display: none; }
+  }
+</style>

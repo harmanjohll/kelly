@@ -1,0 +1,137 @@
+---
+import Base from '../layouts/Base.astro';
+import Art from '../components/Art.astro';
+import { thresholdSVG } from '../lib/bloom';
+import { intentions, products } from '../lib/coach';
+
+const stays = products.find((p) => p.slug === 'the-one-that-stays')!;
+---
+<Base>
+  <section class="hero wrap">
+    <div class="hero-copy">
+      <h1>What would you like them <em>to feel?</em></h1>
+      <p class="lede">Fresh flowers for the week, or crochet flowers to keep. Tell me who they're for and I'll help you choose.</p>
+      <a class="btn" href="/consult/">Help me choose</a>
+    </div>
+    <div class="threshold">
+      <Fragment set:html={thresholdSVG()} />
+      <div class="doors">
+        <a href="/fleeting/"><span class="door-name">Fleeting</span><span class="small muted">Fresh, for a week</span></a>
+        <a href="/forever/"><span class="door-name">Forever</span><span class="small muted">Crochet, to keep</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="say wrap reveal" aria-labelledby="say-h">
+    <h2 id="say-h">Start with what you want to say.</h2>
+    <ul class="phrases">
+      {intentions.map((i) => (
+        <li><a href={`/consult/?say=${i.id}`}>{i.say}</a></li>
+      ))}
+    </ul>
+    <p class="muted">Six short questions, then three suggestions with my reasons, and a card you can make your own.</p>
+  </section>
+
+  <section class="moods wrap" aria-label="Fleeting and forever">
+    <article class="mood reveal">
+      <h2>Fleeting</h2>
+      <p>Fresh flowers, chosen at the market for each delivery day and tied by hand. A week of colour and scent, then they're gone, which is part of why they move people.</p>
+      <dl>
+        <div><dt>Lasts</dt><dd>About a week</dd></div>
+        <div><dt>Care</dt><dd>Fresh water every two days</dd></div>
+        <div><dt>Best for</dt><dd>Celebrations, romance, a table at home</dd></div>
+      </dl>
+      <a href="/fleeting/">See fresh pieces</a>
+    </article>
+    <article class="mood reveal">
+      <h2>Forever</h2>
+      <p>Flowers crocheted stitch by stitch from cotton yarn. They need no water, carry no pollen, and stay exactly as they arrived.</p>
+      <dl>
+        <div><dt>Lasts</dt><dd>As long as you keep it</dd></div>
+        <div><dt>Care</dt><dd>A gentle dust now and then</dd></div>
+        <div><dt>Best for</dt><dd>Hospital wards, allergies, keepsakes, gifts sent from afar</dd></div>
+      </dl>
+      <a href="/forever/">See crochet pieces</a>
+    </article>
+  </section>
+
+  <section class="stays reveal" aria-labelledby="stays-h">
+    <div class="wrap stays-inner">
+      <h2 id="stays-h">The one that stays.</h2>
+      <p>A fresh bouquet with one crocheted bloom tucked inside. When the fresh flowers fade, one remains.</p>
+      <div class="stays-art"><Art product={stays} /></div>
+      <a class="btn ghost" href={`/pieces/${stays.slug}/`}>See The One That Stays</a>
+    </div>
+  </section>
+
+  <section class="care wrap reveal" aria-labelledby="care-h">
+    <h2 id="care-h">Careful with meaning.</h2>
+    <ol class="customs">
+      <li><p>Four stems are set aside for Chinese families, because four (四) sounds like the word for death.</p></li>
+      <li><p>Lilies stay out of homes with cats, and pollen stays off hospital wards.</p></li>
+      <li><p>White chrysanthemums are kept for mourning, never for a birthday.</p></li>
+    </ol>
+    <p><a href="/meanings/">How flowers are read across Singapore's traditions</a></p>
+  </section>
+
+  <section class="maker wrap reveal" aria-labelledby="maker-h">
+    <div class="photo-slot maker-photo">Kelly's portrait, at work in the studio (see docs/shot-list.md)</div>
+    <div>
+      <h2 id="maker-h">Made by Kelly.</h2>
+      <p>Every bouquet is tied by hand and every crochet bloom is worked stitch by stitch, by one person, here in Singapore.</p>
+      <a href="/kelly/">Kelly's story</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: clamp(1.5rem, 4vw, 4rem); align-items: center; min-height: calc(100dvh - 120px); padding-top: 1.5rem; padding-bottom: 2rem; }
+  .hero h1 em { display: inline-block; padding-bottom: 0.08em; }
+  .lede { font-size: 1.15rem; color: var(--ink-2); margin: 1.25rem 0 2rem; max-width: 34ch; }
+  .threshold { position: relative; }
+  .threshold :global(.threshold-art) { width: 100%; height: auto; max-height: 72dvh; margin: 0 auto; }
+  .doors { display: grid; grid-template-columns: 1fr 1fr; margin-top: -0.5rem; }
+  .doors a { display: grid; justify-items: center; gap: 0.1rem; text-decoration: none; padding: 0.5rem; }
+  .doors a:hover .door-name { color: var(--accent); }
+  .door-name { font-family: var(--serif); font-size: 1.6rem; font-style: italic; transition: color 0.2s ease; }
+
+  .say { padding-top: clamp(4rem, 9vw, 7rem); }
+  .phrases { list-style: none; padding: 0; margin: 2rem 0 1.5rem; display: flex; flex-wrap: wrap; gap: 0.25rem 2.25rem; }
+  .phrases a { font-family: var(--serif); font-size: clamp(1.7rem, 3.6vw, 2.6rem); text-decoration: none; line-height: 1.3; }
+  .phrases a { text-decoration-line: underline; text-decoration-color: transparent; text-decoration-thickness: 1px; transition: text-decoration-color 0.2s ease, color 0.2s ease; }
+  .phrases a:hover, .phrases a:focus-visible { text-decoration-color: currentColor; }
+
+  .moods { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin-top: clamp(4rem, 9vw, 7rem); border-top: 1px solid var(--line); }
+  .mood { padding: 2.5rem clamp(0rem, 3vw, 3rem) 0 0; }
+  .mood + .mood { border-left: 1px solid var(--line); padding-left: clamp(1.5rem, 3vw, 3rem); }
+  .mood h2 { font-style: italic; margin-bottom: 1rem; }
+  dl { margin: 1.5rem 0; display: grid; gap: 0.75rem; }
+  dl div { display: grid; grid-template-columns: 6rem 1fr; gap: 1rem; }
+  dt { color: var(--ink-2); font-size: 0.875rem; padding-top: 0.15rem; }
+  dd { margin: 0; }
+
+  .stays { margin-top: clamp(4rem, 9vw, 7rem); background: var(--paper-2); padding: clamp(3rem, 7vw, 6rem) 0; }
+  .stays-inner { display: grid; justify-items: center; text-align: center; }
+  .stays-inner p { margin: 1rem auto 2rem; color: var(--ink-2); font-size: 1.1rem; }
+  .stays-art { width: min(380px, 80vw); margin-bottom: 2rem; }
+  .stays-art :global(.art-frame) { background: var(--paper); }
+
+  .care { padding-top: clamp(4rem, 9vw, 7rem); }
+  .customs { list-style: none; counter-reset: c; padding: 0; margin: 2rem 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+  .customs li { border-top: 1px solid var(--ink); padding-top: 1rem; font-family: var(--serif); font-size: 1.35rem; line-height: 1.35; }
+
+  .maker { display: grid; grid-template-columns: 1fr 1.2fr; gap: clamp(1.5rem, 5vw, 5rem); align-items: center; padding-top: clamp(4rem, 9vw, 7rem); }
+  .maker-photo { aspect-ratio: 4 / 5; }
+  .maker h2 { margin-bottom: 1rem; }
+
+  @media (max-width: 860px) {
+    .hero { grid-template-columns: 1fr; min-height: auto; padding-top: 1rem; }
+    .threshold :global(.threshold-art) { max-height: 52dvh; }
+    .moods { grid-template-columns: 1fr; }
+    .mood { padding-right: 0; }
+    .mood + .mood { border-left: 0; border-top: 1px solid var(--line); padding-left: 0; margin-top: 2.5rem; }
+    .customs { grid-template-columns: 1fr; gap: 1.25rem; }
+    .maker { grid-template-columns: 1fr; }
+    .maker-photo { aspect-ratio: 4 / 3; }
+  }
+</style>

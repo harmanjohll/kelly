@@ -1,0 +1,15 @@
+---
+import Base from '../layouts/Base.astro';
+import Collection from '../components/Collection.astro';
+import { products } from '../lib/coach';
+import { site } from '../config/site';
+const items = [...products.filter((p) => p.line === 'forever'), products.find((p) => p.line === 'stays')!];
+---
+<Base title="Forever: crochet flowers" description="Crochet flower arrangements by Kelly, made by hand to order. No water, no pollen, kept for years.">
+  <Collection
+    title="Forever"
+    intro="Flowers crocheted by hand from cotton yarn. No water, no pollen, and they stay exactly as they arrived."
+    items={items}
+    facts={[site.crochet.leadNote, 'Welcome on hospital wards', 'Ships anywhere in Singapore']}
+  />
+</Base>

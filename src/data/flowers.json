@@ -1,0 +1,139 @@
+{
+  "_note": "Meanings vary between families, regions and sources. Victorian meanings follow Seaton (1995), who shows the old flower dictionaries often disagreed. Entries marked verify should be checked with someone from that community before launch.",
+  "flowers": [
+    {
+      "id": "rose",
+      "name": "Rose",
+      "meanings": {
+        "victorian": "Love; red for passion, pink for grace and gratitude, white for innocence.",
+        "japanese": "Red roses carry romantic love (ai, koi) in hanakotoba.",
+        "chinese": "Red is the colour of joy and good fortune, which makes red roses a natural fit for romance and celebration."
+      }
+    },
+    {
+      "id": "spray-rose",
+      "name": "Spray rose",
+      "meanings": { "victorian": "A smaller cousin of the rose, read as affection and gentleness." }
+    },
+    {
+      "id": "ranunculus",
+      "name": "Ranunculus",
+      "meanings": { "victorian": "Radiant charm; 'I am dazzled by your charms'." }
+    },
+    {
+      "id": "chamomile",
+      "name": "Chamomile",
+      "meanings": { "victorian": "Energy in adversity; patience." }
+    },
+    {
+      "id": "eucalyptus",
+      "name": "Eucalyptus",
+      "meanings": { "general": "A modern florist's green, chosen for its soft scent and silver colour rather than an old meaning." }
+    },
+    {
+      "id": "chrysanthemum",
+      "name": "Chrysanthemum",
+      "meanings": {
+        "chinese": "A classical symbol of autumn and long life, but white and yellow chrysanthemums are used for mourning, so they are kept away from celebrations.",
+        "japanese": "The imperial flower. White chrysanthemums are strongly linked with funerals.",
+        "victorian": "Cheerfulness; white for truth."
+      }
+    },
+    {
+      "id": "lisianthus",
+      "name": "Lisianthus",
+      "meanings": { "victorian": "Appreciation; a later addition to the flower language, so sources vary." }
+    },
+    {
+      "id": "lily",
+      "name": "Lily",
+      "meanings": {
+        "victorian": "White lilies for purity and majesty.",
+        "chinese": "Bai he (百合) sounds like 'a hundred years together', a wedding wish; white lilies are also common at funerals.",
+        "care": "Lily pollen is toxic to cats, and the scent can be strong for patients."
+      }
+    },
+    {
+      "id": "sunflower",
+      "name": "Sunflower",
+      "meanings": {
+        "victorian": "Adoration.",
+        "japanese": "Adoration and loyalty; 'I only look at you'."
+      }
+    },
+    {
+      "id": "statice",
+      "name": "Statice",
+      "meanings": { "victorian": "Remembrance; it keeps its colour when dried." }
+    },
+    {
+      "id": "orchid",
+      "name": "Orchid",
+      "meanings": {
+        "chinese": "Lan (兰) stands for refinement and integrity, one of the classical 'four gentlemen' plants.",
+        "singapore": "Singapore's national flower is an orchid, the Vanda Miss Joaquim.",
+        "victorian": "Refined beauty."
+      }
+    },
+    {
+      "id": "tulip",
+      "name": "Tulip",
+      "meanings": {
+        "victorian": "A declaration of love; yellow once meant hopeless love, now read as cheer.",
+        "japanese": "Red tulips for a declaration of love; pink for caring."
+      }
+    },
+    {
+      "id": "daisy",
+      "name": "Daisy",
+      "meanings": { "victorian": "Innocence and loyal love." }
+    },
+    {
+      "id": "carnation",
+      "name": "Carnation",
+      "meanings": {
+        "general": "In Singapore and across East Asia, carnations are the flower of Teachers' Day and Mother's Day.",
+        "japanese": "Red carnations for a mother's love."
+      }
+    },
+    {
+      "id": "jasmine",
+      "name": "Jasmine",
+      "meanings": {
+        "indian": "Malli or mogra is auspicious: worn in the hair, offered at temples, woven into wedding garlands.",
+        "malay": "Melati is loved for its scent and used in bunga rampai, the fragrant mix given at weddings.",
+        "verify": true
+      }
+    },
+    {
+      "id": "marigold",
+      "name": "Marigold",
+      "meanings": { "indian": "Auspicious and joyful; marigold garlands mark weddings, festivals and prayers." }
+    },
+    {
+      "id": "camellia",
+      "name": "Camellia",
+      "meanings": { "japanese": "Tsubaki flowers fall whole from the stem, which some read as an ill omen, so they are avoided for the sick." }
+    }
+  ],
+  "customs": [
+    { "tradition": "Chinese", "points": [
+      "Avoid four stems; four (四) sounds like the word for death.",
+      "White and yellow chrysanthemums, and white arrangements generally, are for mourning.",
+      "Bright red and pink are joyful colours; they don't belong at a wake.",
+      "At a wake a standing wreath is customary; a bouquet is better sent to the family home."
+    ]},
+    { "tradition": "Japanese", "points": [
+      "Potted plants are avoided for patients, because 'taking root' suggests a long stay.",
+      "Camellias are avoided for the sick; chrysanthemums are linked with funerals."
+    ]},
+    { "tradition": "Malay", "points": [
+      "In Malay Muslim custom flowers are less usual at the funeral itself; a simple arrangement for the family home after the burial is a kind gesture.",
+      "Bunga rampai, a fragrant mix of flowers and pandan, is given to guests at weddings."
+    ], "verify": true },
+    { "tradition": "Indian", "points": [
+      "Jasmine and marigold are auspicious and joyful.",
+      "In many Hindu families white leans towards mourning, so happy occasions call for colour."
+    ]}
+  ]
+}

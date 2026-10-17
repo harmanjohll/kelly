@@ -1,0 +1,43 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base title="About Kelly" description="Kelly makes fresh and crochet flower arrangements by hand in Singapore.">
+  <article class="story wrap">
+    <header>
+      <h1>Kelly</h1>
+      <p class="lede">Fresh flowers for the week, crochet flowers to keep, all made by one pair of hands in Singapore.</p>
+    </header>
+    <div class="photo-slot portrait">Portrait of Kelly at the worktable, natural light (see docs/shot-list.md)</div>
+
+    <div class="body">
+      <aside class="note small" role="note">Kelly will write this page. The prompts below are a guide, so the story is told in Kelly's own words.</aside>
+
+      <h2>How it began</h2>
+      <p class="prompt">When did you first make a bouquet, or a crochet flower? Who was it for?</p>
+
+      <h2>Why both</h2>
+      <p class="prompt">What does a fresh flower give that a crochet one can't, and the other way round? When do you reach for each?</p>
+
+      <div class="photo-slot process">Kelly's hands mid stitch, close up, with the yarn and hook visible</div>
+
+      <h2>How I work</h2>
+      <p class="prompt">Where do your fresh stems come from? How long does a crochet rose take? What do you never compromise on?</p>
+
+      <h2>A piece I remember</h2>
+      <p class="prompt">One order that stayed with you, and why. Leave out names unless the customer agrees.</p>
+    </div>
+  </article>
+</Base>
+
+<style>
+  .story { max-width: 900px; padding-top: clamp(2rem, 6vw, 4.5rem); }
+  header { margin-bottom: 2.5rem; }
+  h1 { font-style: italic; font-size: clamp(3rem, 8vw, 5.5rem); }
+  .lede { font-size: 1.25rem; color: var(--ink-2); margin-top: 1rem; max-width: 40ch; }
+  .portrait { aspect-ratio: 16 / 9; }
+  .process { aspect-ratio: 3 / 2; margin: 2.5rem 0; }
+  .body { max-width: 640px; margin: 3rem auto 0; }
+  .note { background: var(--paper-2); padding: 1rem 1.25rem; border-left: 2px solid var(--accent); margin-bottom: 2.5rem; }
+  h2 { font-size: 1.9rem; margin: 2.5rem 0 0.75rem; }
+  .prompt { color: var(--ink-2); font-style: italic; font-family: var(--serif); font-size: 1.35rem; line-height: 1.45; }
+</style>

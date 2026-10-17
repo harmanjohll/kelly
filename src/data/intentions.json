@@ -1,0 +1,10 @@
+[
+  { "id": "sorry", "say": "I'm sorry", "phrase": "I'm sorry", "hint": "An apology that words alone can't carry", "register": "quiet" },
+  { "id": "thanks", "say": "Thank you", "phrase": "thank you", "hint": "For a teacher, a host, a friend who showed up", "register": "open" },
+  { "id": "proud", "say": "I'm proud of you", "phrase": "I'm proud of you", "hint": "Graduations, first jobs, hard things done", "register": "open" },
+  { "id": "here", "say": "I'm thinking of you", "phrase": "I'm thinking of you", "hint": "Get well, a hard season, a long way from home", "register": "quiet" },
+  { "id": "love", "say": "I love you", "phrase": "I love you", "hint": "Partners, parents, anniversaries, no reason at all", "register": "open" },
+  { "id": "celebrate", "say": "Congratulations", "phrase": "congratulations", "hint": "Birthdays, new babies, new homes, openings", "register": "open" },
+  { "id": "sympathy", "say": "With sympathy", "phrase": "with sympathy", "hint": "For a family in mourning", "register": "quiet" },
+  { "id": "self", "say": "Something for me", "phrase": "something for yourself", "hint": "Because you'd like flowers on your table", "register": "open" }
+]
