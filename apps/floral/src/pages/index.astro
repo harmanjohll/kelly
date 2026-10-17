@@ -1,4 +1,5 @@
 ---
+import { url } from '../lib/url';
 import Base from '../layouts/Base.astro';
 import Art from '../components/Art.astro';
 import { thresholdSVG } from '../lib/bloom';
@@ -11,13 +12,13 @@ const stays = products.find((p) => p.slug === 'the-one-that-stays')!;
     <div class="hero-copy">
       <h1>What would you like them <em>to feel?</em></h1>
       <p class="lede">Fresh flowers for the week, or crochet flowers to keep. Tell me who they're for and I'll help you choose.</p>
-      <a class="btn" href="/consult/">Help me choose</a>
+      <a class="btn" href={url('/consult/')}>Help me choose</a>
     </div>
     <div class="threshold">
       <Fragment set:html={thresholdSVG()} />
       <div class="doors">
-        <a href="/fleeting/"><span class="door-name">Fleeting</span><span class="small muted">Fresh, for a week</span></a>
-        <a href="/forever/"><span class="door-name">Forever</span><span class="small muted">Crochet, to keep</span></a>
+        <a href={url('/fleeting/')}><span class="door-name">Fleeting</span><span class="small muted">Fresh, for a week</span></a>
+        <a href={url('/forever/')}><span class="door-name">Forever</span><span class="small muted">Crochet, to keep</span></a>
       </div>
     </div>
   </section>
@@ -26,7 +27,7 @@ const stays = products.find((p) => p.slug === 'the-one-that-stays')!;
     <h2 id="say-h">Start with what you want to say.</h2>
     <ul class="phrases">
       {intentions.map((i) => (
-        <li><a href={`/consult/?say=${i.id}`}>{i.say}</a></li>
+        <li><a href={url(`/consult/?say=${i.id}`)}>{i.say}</a></li>
       ))}
     </ul>
     <p class="muted">Six short questions, then three suggestions with my reasons, and a card you can make your own.</p>
@@ -41,7 +42,7 @@ const stays = products.find((p) => p.slug === 'the-one-that-stays')!;
         <div><dt>Care</dt><dd>Fresh water every two days</dd></div>
         <div><dt>Best for</dt><dd>Celebrations, romance, a table at home</dd></div>
       </dl>
-      <a href="/fleeting/">See fresh pieces</a>
+      <a href={url('/fleeting/')}>See fresh pieces</a>
     </article>
     <article class="mood reveal">
       <h2>Forever</h2>
@@ -51,7 +52,7 @@ const stays = products.find((p) => p.slug === 'the-one-that-stays')!;
         <div><dt>Care</dt><dd>A gentle dust now and then</dd></div>
         <div><dt>Best for</dt><dd>Hospital wards, allergies, keepsakes, gifts sent from afar</dd></div>
       </dl>
-      <a href="/forever/">See crochet pieces</a>
+      <a href={url('/forever/')}>See crochet pieces</a>
     </article>
   </section>
 
@@ -60,7 +61,7 @@ const stays = products.find((p) => p.slug === 'the-one-that-stays')!;
       <h2 id="stays-h">The one that stays.</h2>
       <p>A fresh bouquet with one crocheted bloom tucked inside. When the fresh flowers fade, one remains.</p>
       <div class="stays-art"><Art product={stays} /></div>
-      <a class="btn ghost" href={`/pieces/${stays.slug}/`}>See The One That Stays</a>
+      <a class="btn ghost" href={url(`/pieces/${stays.slug}/`)}>See The One That Stays</a>
     </div>
   </section>
 
@@ -71,7 +72,7 @@ const stays = products.find((p) => p.slug === 'the-one-that-stays')!;
       <li><p>Lilies stay out of homes with cats, and pollen stays off hospital wards.</p></li>
       <li><p>White chrysanthemums are kept for mourning, never for a birthday.</p></li>
     </ol>
-    <p><a href="/meanings/">How flowers are read across Singapore's traditions</a></p>
+    <p><a href={url('/meanings/')}>How flowers are read across Singapore's traditions</a></p>
   </section>
 
   <section class="maker wrap reveal" aria-labelledby="maker-h">
@@ -79,7 +80,7 @@ const stays = products.find((p) => p.slug === 'the-one-that-stays')!;
     <div>
       <h2 id="maker-h">Made by Kelly.</h2>
       <p>Every bouquet is tied by hand and every crochet bloom is worked stitch by stitch, by one person, here in Singapore.</p>
-      <a href="/kelly/">Kelly's story</a>
+      <a href={url('/kelly/')}>Kelly's story</a>
     </div>
   </section>
 </Base>

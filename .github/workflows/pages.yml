@@ -1,0 +1,80 @@
+# Builds every app and publishes them together to GitHub Pages.
+# Each app lives under its own path: the floral site is https://harmanjohll.github.io/kelly/floral/.
+# To publish another app, add a build step below (BASE_PATH = Pages base path + /<app-name>)
+# and copy its output into _site/<app-name>/.
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/floral/package-lock.json
+
+      - id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Build the floral site
+        working-directory: apps/floral
+        env:
+          SITE_URL: ${{ steps.pages.outputs.origin }}
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}/floral
+        run: |
+          npm ci
+          npm test
+          npm run build
+
+      - name: Assemble the Pages site
+        run: |
+          mkdir -p _site/floral
+          cp -r apps/floral/dist/. _site/floral/
+          # Unknown paths anywhere on the site get the floral "page not found" page.
+          cp apps/floral/dist/404.html _site/404.html
+          # The bare address sends visitors on to the floral site.
+          cat > _site/index.html <<'HTML'
+          <!doctype html>
+          <html lang="en">
+            <head>
+              <meta charset="utf-8">
+              <title>Kelly</title>
+              <meta http-equiv="refresh" content="0; url=floral/">
+              <link rel="canonical" href="floral/">
+            </head>
+            <body>
+              <p><a href="floral/">Kelly's floral studio</a></p>
+            </body>
+          </html>
+          HTML
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

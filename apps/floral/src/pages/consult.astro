@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import { intentions } from '../lib/coach';
 import { labels } from '../lib/brief';
 import { site } from '../config/site';
+import { url } from '../lib/url';
 
 const relationships = Object.entries(labels.relationship).filter(([k]) => k !== 'self');
 const settings = Object.entries(labels.setting);
@@ -27,7 +28,7 @@ const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
     <div class="progress" aria-hidden="true"><span class="bar"></span></div>
     <p class="count small muted" aria-live="polite"></p>
 
-    <noscript><p>The consultation needs JavaScript. You can still <a href="/fleeting/">browse fresh pieces</a> or <a href="/forever/">crochet pieces</a>.</p></noscript>
+    <noscript><p>The consultation needs JavaScript. You can still <a href={url('/fleeting/')}>browse fresh pieces</a> or <a href={url('/forever/')}>crochet pieces</a>.</p></noscript>
 
     <form id="consult" novalidate>
       <section class="step" data-step="say">
@@ -180,6 +181,7 @@ const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
   import { briefLink } from '../lib/brief';
   import { artFor } from '../lib/bloom';
   import { track } from '../lib/track';
+  import { url } from '../lib/url';
   import type { Answers, CoachResult, Product } from '../lib/types';
 
   const root = document.querySelector<HTMLElement>('.consult')!;
@@ -348,7 +350,7 @@ const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
           <span class="pick-name">${esc(p.product.name)}</span>
           <span class="small muted">${lineLabel[p.product.line]}</span>
           <span class="pick-reason">${esc(p.reason)}</span>
-          ${p.product.line !== 'bespoke' ? `<a class="small" href="/pieces/${p.product.slug}/" target="_blank" rel="noopener">More about this piece</a>` : ''}
+          ${p.product.line !== 'bespoke' ? `<a class="small" href="${url(`/pieces/${p.product.slug}/`)}" target="_blank" rel="noopener">More about this piece</a>` : ''}
         </span>
       </label>`).join('');
 
