@@ -1,0 +1,15 @@
+---
+import Base from '../layouts/Base.astro';
+import Collection from '../components/Collection.astro';
+import { products } from '../lib/coach';
+import { site } from '../config/site';
+const items = [products.find((p) => p.line === 'stays')!, ...products.filter((p) => p.line === 'fresh')];
+---
+<Base title="Fleeting: fresh flowers" description="Fresh flower arrangements by Kelly, tied by hand and delivered in Singapore.">
+  <Collection
+    title="Fleeting"
+    intro="Fresh flowers, chosen for each delivery day and tied by hand. At their best for about a week."
+    items={items}
+    facts={[`Delivered ${site.fresh.deliveryDays.join(' and ')}`, `Order by ${site.fresh.orderBy}`, 'Care card with every bouquet']}
+  />
+</Base>

@@ -1,0 +1,257 @@
+[
+  {
+    "id": "chinese-four",
+    "when": {
+      "culture": [
+        "chinese"
+      ]
+    },
+    "action": "exclude",
+    "match": {
+      "stems": [
+        4,
+        14
+      ]
+    },
+    "explain": "In Chinese, four (四) sounds like the word for death, so I've set aside arrangements of four stems. I'm happy to make any of them with five."
+  },
+  {
+    "id": "mourning-white-at-happy-times",
+    "when": {
+      "culture": [
+        "chinese",
+        "japanese"
+      ],
+      "notIntention": [
+        "sympathy"
+      ]
+    },
+    "action": "exclude",
+    "match": {
+      "mourningCoded": true
+    },
+    "explain": "White chrysanthemums are kept for mourning in Chinese and Japanese custom, so I've left out the arrangement built around them."
+  },
+  {
+    "id": "no-mourning-for-the-living",
+    "when": {
+      "intention": [
+        "here",
+        "celebrate",
+        "proud",
+        "love",
+        "thanks",
+        "self",
+        "sorry"
+      ]
+    },
+    "action": "exclude",
+    "match": {
+      "mourningCoded": true
+    },
+    "explain": "Arrangements made for mourning stay out of every other occasion."
+  },
+  {
+    "id": "indian-white-at-happy-times",
+    "when": {
+      "culture": [
+        "indian"
+      ],
+      "notIntention": [
+        "sympathy",
+        "here"
+      ]
+    },
+    "action": "exclude",
+    "match": {
+      "palette": [
+        "white"
+      ]
+    },
+    "explain": "In many Hindu families white leans towards mourning, so for a happy occasion I've chosen colour instead."
+  },
+  {
+    "id": "no-red-for-sympathy",
+    "when": {
+      "intention": [
+        "sympathy"
+      ]
+    },
+    "action": "exclude",
+    "match": {
+      "colors": [
+        "red",
+        "orange"
+      ]
+    },
+    "explain": "Bright reds and oranges are colours of celebration, so I've kept them away from a message of sympathy."
+  },
+  {
+    "id": "no-red-at-wake",
+    "when": {
+      "setting": [
+        "wake"
+      ]
+    },
+    "action": "exclude",
+    "match": {
+      "colors": [
+        "red",
+        "orange"
+      ],
+      "palette": [
+        "bright",
+        "deep"
+      ]
+    },
+    "explain": "Bright and red flowers are out of place at a wake, so I've kept to white, green and soft tones."
+  },
+  {
+    "id": "wake-wreath",
+    "when": {
+      "setting": [
+        "wake"
+      ]
+    },
+    "action": "note",
+    "explain": "At a wake a standing wreath is customary. What I make here is best sent to the family home; if you need a wreath, tell me and I'll arrange one."
+  },
+  {
+    "id": "chinese-sympathy-white",
+    "when": {
+      "culture": [
+        "chinese"
+      ],
+      "intention": [
+        "sympathy"
+      ]
+    },
+    "action": "boost",
+    "match": {
+      "palette": [
+        "white"
+      ]
+    },
+    "boost": 2,
+    "explain": "For a Chinese family in mourning, white and soft green are the customary colours, so I've put those first."
+  },
+  {
+    "id": "malay-sympathy",
+    "when": {
+      "culture": [
+        "malay"
+      ],
+      "intention": [
+        "sympathy"
+      ]
+    },
+    "action": "note",
+    "explain": "In Malay Muslim custom flowers are less usual at the funeral itself. A simple arrangement sent to the family home after the burial is a gentle way to show you care."
+  },
+  {
+    "id": "hospital-no-soil",
+    "when": {
+      "setting": [
+        "hospital"
+      ]
+    },
+    "action": "exclude",
+    "match": {
+      "potted": true
+    },
+    "explain": "Many wards don't allow plants in soil, and in Japanese custom a potted plant suggests a long stay, so I've left those out."
+  },
+  {
+    "id": "hospital-no-pollen",
+    "when": {
+      "setting": [
+        "hospital"
+      ]
+    },
+    "action": "exclude",
+    "match": {
+      "pollen": true,
+      "fragrant": true
+    },
+    "explain": "Heavy pollen and strong scent can trouble patients and their neighbours, so I've left those out."
+  },
+  {
+    "id": "hospital-crochet",
+    "when": {
+      "setting": [
+        "hospital"
+      ]
+    },
+    "action": "boost",
+    "match": {
+      "lines": [
+        "forever"
+      ]
+    },
+    "boost": 4,
+    "explain": "Some wards don't allow fresh flowers at all. Crochet is welcome anywhere, and it comes home with them."
+  },
+  {
+    "id": "japanese-camellia",
+    "when": {
+      "culture": [
+        "japanese"
+      ],
+      "intention": [
+        "here"
+      ]
+    },
+    "action": "exclude",
+    "match": {
+      "flowers": [
+        "camellia"
+      ]
+    },
+    "explain": "Camellias fall whole from the stem, which in Japanese custom makes them unlucky for someone unwell."
+  },
+  {
+    "id": "allergies",
+    "when": {
+      "household": [
+        "allergies"
+      ]
+    },
+    "action": "exclude",
+    "match": {
+      "pollen": true,
+      "fragrant": true
+    },
+    "explain": "Because of allergies, I've left out anything with heavy pollen or scent."
+  },
+  {
+    "id": "allergies-crochet",
+    "when": {
+      "household": [
+        "allergies"
+      ]
+    },
+    "action": "boost",
+    "match": {
+      "lines": [
+        "forever"
+      ]
+    },
+    "boost": 2,
+    "explain": "Crochet has no pollen at all, so I've brought it forward."
+  },
+  {
+    "id": "cats-lilies",
+    "when": {
+      "household": [
+        "pets"
+      ]
+    },
+    "action": "exclude",
+    "match": {
+      "flowers": [
+        "lily"
+      ]
+    },
+    "explain": "Lilies are toxic to cats, even the pollen, so they're out."
+  }
+]

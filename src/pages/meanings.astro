@@ -1,0 +1,91 @@
+---
+import Base from '../layouts/Base.astro';
+import data from '../data/flowers.json';
+
+const traditionName: Record<string, string> = { victorian: 'Victorian', chinese: 'Chinese', japanese: 'Japanese', malay: 'Malay', indian: 'Indian', singapore: 'Singapore', general: 'Today', care: 'Care' };
+const flowers = data.flowers.map((f) => ({
+  name: f.name,
+  meanings: Object.entries(f.meanings).filter(([k, v]) => typeof v === 'string' && k !== 'verify') as [string, string][],
+}));
+---
+<Base title="Meanings and care" description="How flowers are read across Singapore's traditions, and how to care for fresh and crochet flowers.">
+  <section class="wrap head">
+    <h1>Meanings and care.</h1>
+    <p class="lede">Singapore is many traditions living side by side, and flowers are read differently in each. These are the customs the consultation respects.</p>
+  </section>
+
+  <section class="wrap customs" aria-labelledby="customs-h">
+    <h2 id="customs-h">Customs I keep</h2>
+    <div class="custom-grid">
+      {data.customs.map((c) => (
+        <article>
+          <h3>{c.tradition}</h3>
+          <ul>{c.points.map((p) => <li>{p}</li>)}</ul>
+        </article>
+      ))}
+    </div>
+    <p class="small muted">Families differ, and many blend customs. If you're unsure, tell me in your brief and I'll ask the right questions.</p>
+  </section>
+
+  <section class="wrap flowers" aria-labelledby="flowers-h">
+    <h2 id="flowers-h">What the flowers say</h2>
+    <div class="flower-list">
+      {flowers.map((f) => (
+        <div class="flower">
+          <h3>{f.name}</h3>
+          <dl>
+            {f.meanings.map(([k, v]) => <div><dt>{traditionName[k] ?? k}</dt><dd>{v}</dd></div>)}
+          </dl>
+        </div>
+      ))}
+    </div>
+    <p class="small muted">The Victorian "language of flowers" was never one fixed code; the old flower dictionaries often disagreed (Beverly Seaton, The Language of Flowers: A History, 1995). Read these as traditions, not rules.</p>
+  </section>
+
+  <section class="wrap care" aria-labelledby="care-h">
+    <h2 id="care-h">Care</h2>
+    <div class="care-grid">
+      <article>
+        <h3><em>Fleeting</em></h3>
+        <ol>
+          <li>Trim 2cm off each stem at an angle as soon as they arrive.</li>
+          <li>Use a clean vase and cool water; change it every two days.</li>
+          <li>Keep away from direct sun, fruit bowls and air conditioning vents.</li>
+          <li>Remove leaves below the waterline.</li>
+        </ol>
+      </article>
+      <article>
+        <h3><em>Forever</em></h3>
+        <ol>
+          <li>No water, ever.</li>
+          <li>Keep out of strong sun so the colours stay true.</li>
+          <li>Dust with a soft, dry brush now and then.</li>
+          <li>If a petal loses its shape, ask Kelly; crochet can be mended.</li>
+        </ol>
+      </article>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .head { padding-top: clamp(2rem, 6vw, 4.5rem); }
+  .lede { font-size: 1.2rem; color: var(--ink-2); margin-top: 1rem; max-width: 52ch; }
+  section + section { margin-top: clamp(3rem, 7vw, 5rem); }
+  h2 { margin-bottom: 1.75rem; }
+  .custom-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem 3rem; margin-bottom: 1.5rem; }
+  .custom-grid h3 { margin-bottom: 0.6rem; }
+  .custom-grid ul { margin: 0; padding-left: 1.1rem; display: grid; gap: 0.4rem; }
+  .flower-list { columns: 2 22rem; column-gap: 3rem; margin-bottom: 1.5rem; }
+  .flower { break-inside: avoid; padding: 1.1rem 0; border-top: 1px solid var(--line); }
+  .flower h3 { margin-bottom: 0.5rem; }
+  dl { margin: 0; display: grid; gap: 0.4rem; }
+  dl div { display: grid; grid-template-columns: 6rem 1fr; gap: 0.75rem; }
+  dt { color: var(--ink-2); font-size: 0.875rem; padding-top: 0.15rem; }
+  dd { margin: 0; }
+  .care-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; background: var(--paper-2); padding: clamp(1.5rem, 4vw, 3rem); border-radius: var(--edge); }
+  .care-grid h3 { font-size: 1.9rem; margin-bottom: 0.75rem; }
+  .care-grid ol { margin: 0; padding-left: 1.2rem; display: grid; gap: 0.5rem; }
+  @media (max-width: 760px) {
+    .custom-grid, .care-grid { grid-template-columns: 1fr; gap: 2rem; }
+  }
+</style>

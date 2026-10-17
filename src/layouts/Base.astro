@@ -1,0 +1,121 @@
+---
+import '@fontsource/cormorant-garamond/400.css';
+import '@fontsource/cormorant-garamond/500.css';
+import '@fontsource/cormorant-garamond/400-italic.css';
+import '@fontsource-variable/hanken-grotesk';
+import '../styles/global.css';
+import { site, waLink } from '../config/site';
+
+interface Props {
+  title?: string;
+  description?: string;
+  register?: 'open' | 'quiet';
+}
+const { title, description = 'Flowers by Kelly: fresh for the week, or crocheted by hand to keep. A short consultation helps you choose.', register = 'open' } = Astro.props;
+const pageTitle = title ? `${title} | ${site.name}` : `${site.name} | Fresh flowers and crochet flowers, Singapore`;
+const path = Astro.url.pathname;
+const nav = [
+  { href: '/fleeting/', label: 'Fleeting' },
+  { href: '/forever/', label: 'Forever' },
+  { href: '/meanings/', label: 'Meanings' },
+  { href: '/kelly/', label: 'About Kelly' },
+];
+---
+<!doctype html>
+<html lang="en-SG">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#f1f2ec" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#121814" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <script is:inline>document.documentElement.classList.add('js');</script>
+  </head>
+  <body data-register={register}>
+    <a class="skip sr-only" href="#main">Skip to content</a>
+    {site.draft && (
+      <div class="draft" role="note">Preview. Prices, photographs and stories are placeholders until Kelly confirms them.</div>
+    )}
+    <header class="top wrap">
+      <a class="mark" href="/" aria-label="Kelly, home">Kelly</a>
+      <nav aria-label="Main">
+        <ul class="links">
+          {nav.map((n) => <li><a href={n.href} aria-current={path.startsWith(n.href) ? 'page' : undefined}>{n.label}</a></li>)}
+        </ul>
+        <details class="menu">
+          <summary>Menu</summary>
+          <ul>
+            {nav.map((n) => <li><a href={n.href}>{n.label}</a></li>)}
+          </ul>
+        </details>
+      </nav>
+      <a class="btn nav-cta" href="/consult/">Help me choose</a>
+    </header>
+
+    <main id="main">
+      <slot />
+    </main>
+
+    <footer class="foot">
+      <div class="wrap foot-grid">
+        <div>
+          <p class="foot-mark">Kelly</p>
+          <p class="muted">{site.tagline} Every piece is made by Kelly in Singapore.</p>
+        </div>
+        <div>
+          <h2 class="foot-h">How ordering works</h2>
+          <p class="muted small">Choose a piece, or let the consultation help. Your brief goes to Kelly on WhatsApp. {site.payment}</p>
+          <p class="muted small">Fresh flowers are delivered on {site.fresh.deliveryDays.join(' and ')}; order by {site.fresh.orderBy}. {site.crochet.leadNote}</p>
+        </div>
+        <div>
+          <h2 class="foot-h">Promises</h2>
+          <p class="muted small">The price Kelly quotes is the price you pay, delivery included. No countdown timers. Your recipient's details are used only to deliver their flowers.</p>
+          <p class="small"><a href={waLink('Hello Kelly, I have a question.')} rel="noopener">Message Kelly on WhatsApp</a>{site.instagram && <> · <a href={`https://instagram.com/${site.instagram}`} rel="noopener">Instagram</a></>}</p>
+        </div>
+      </div>
+      <div class="wrap foot-base small muted">
+        <p>The drawings on this site stand in for Kelly's photographs, which are coming.</p>
+      </div>
+    </footer>
+
+    <script>
+      const io = new IntersectionObserver((entries) => {
+        for (const e of entries) if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+      }, { rootMargin: '0px 0px -8% 0px' });
+      document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+    </script>
+  </body>
+</html>
+
+<style>
+  .draft { background: var(--paper-2); color: var(--ink-2); font-size: 0.8125rem; text-align: center; padding: 0.5rem var(--gutter); }
+  .skip:focus { position: static; width: auto; height: auto; clip: auto; margin: 0; padding: 0.5rem 1rem; }
+  .top { display: flex; align-items: center; gap: 2rem; height: 72px; }
+  .mark { font-family: var(--serif); font-style: italic; font-size: 2rem; text-decoration: none; line-height: 1; padding-bottom: 0.1em; }
+  nav { margin-left: auto; }
+  .links { display: flex; gap: 1.75rem; list-style: none; margin: 0; padding: 0; }
+  .links a { text-decoration: none; font-size: 0.95rem; }
+  .links a[aria-current='page'] { text-decoration: underline; }
+  .menu { display: none; position: relative; }
+  .menu summary { cursor: pointer; list-style: none; padding: 0.5rem 0; }
+  .menu summary::-webkit-details-marker { display: none; }
+  .menu ul { position: absolute; right: 0; top: 2.5rem; z-index: 20; list-style: none; margin: 0; padding: 1rem 1.25rem; background: var(--paper); border: 1px solid var(--line); border-radius: var(--edge); min-width: 12rem; display: grid; gap: 0.75rem; }
+  .menu a { text-decoration: none; }
+  @media (max-width: 860px) {
+    .links { display: none; }
+    .menu { display: block; }
+    .top { gap: 1rem; height: 64px; }
+    .nav-cta { min-height: 40px; padding: 0 1em; font-size: 0.9rem; }
+  }
+
+  .foot { margin-top: clamp(4rem, 10vw, 8rem); border-top: 1px solid var(--line); padding-top: 3rem; }
+  .foot-grid { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 2.5rem; }
+  .foot-mark { font-family: var(--serif); font-style: italic; font-size: 2.25rem; line-height: 1; margin-bottom: 0.75rem; }
+  .foot-h { font-family: var(--sans); font-size: 0.95rem; font-weight: 600; margin-bottom: 0.6rem; }
+  .foot-base { padding-top: 2rem; padding-bottom: 2.5rem; }
+  @media (max-width: 760px) { .foot-grid { grid-template-columns: 1fr; gap: 1.75rem; } }
+</style>
