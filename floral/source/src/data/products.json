@@ -45,7 +45,18 @@
     "leadDays": 3,
     "lifespan": "Fresh stems for about a week. The crochet bloom stays.",
     "care": "Trim the stems and change the water every two days. Lift the crochet bloom out before the vase is emptied.",
-    "size": "About 40cm tall, held in two hands."
+    "size": "About 40cm tall, held in two hands.",
+    "art": {
+      "blooms": [
+        "sprig",
+        "ruffle",
+        "rose",
+        "tulip",
+        "sprig"
+      ],
+      "seed": 7,
+      "tone": "blush"
+    }
   },
   {
     "slug": "morning-market",
@@ -89,7 +100,18 @@
     "leadDays": 2,
     "lifespan": "About five to seven days in a cool room.",
     "care": "Trim 2cm off the stems, use a clean vase and change the water every two days.",
-    "size": "About 35cm tall, a relaxed armful."
+    "size": "About 35cm tall, a relaxed armful.",
+    "art": {
+      "blooms": [
+        "daisy",
+        "ruffle",
+        "daisy",
+        "sprig",
+        "tulip"
+      ],
+      "seed": 11,
+      "tone": "sun"
+    }
   },
   {
     "slug": "blush-letter",
@@ -129,7 +151,18 @@
     "leadDays": 2,
     "lifespan": "About a week. Garden roses open fully by day four.",
     "care": "Keep away from direct sun and air conditioning vents. Change the water every two days.",
-    "size": "About 40cm tall."
+    "size": "About 40cm tall.",
+    "art": {
+      "blooms": [
+        "rose",
+        "rose",
+        "sprig",
+        "rose",
+        "sprig"
+      ],
+      "seed": 3,
+      "tone": "blush"
+    }
   },
   {
     "slug": "twelve-reds",
@@ -161,7 +194,18 @@
     "leadDays": 2,
     "lifespan": "About a week.",
     "care": "Recut the stems at an angle and keep the vase topped up. Roses drink a lot.",
-    "size": "About 55cm tall."
+    "size": "About 55cm tall.",
+    "art": {
+      "blooms": [
+        "rose",
+        "rose",
+        "rose",
+        "rose",
+        "rose"
+      ],
+      "seed": 12,
+      "tone": "wine"
+    }
   },
   {
     "slug": "quiet-field",
@@ -198,7 +242,18 @@
     "leadDays": 2,
     "lifespan": "About a week, often longer. Chrysanthemums are hardy.",
     "care": "Change the water every two days and remove leaves below the waterline.",
-    "size": "About 40cm tall."
+    "size": "About 40cm tall.",
+    "art": {
+      "blooms": [
+        "ruffle",
+        "daisy",
+        "sprig",
+        "ruffle",
+        "sprig"
+      ],
+      "seed": 5,
+      "tone": "ivory"
+    }
   },
   {
     "slug": "lily-and-linen",
@@ -236,7 +291,17 @@
     "leadDays": 2,
     "lifespan": "Up to ten days as the buds open in turn.",
     "care": "Pinch out the orange pollen as each lily opens; it stains. Keep well away from cats.",
-    "size": "About 60cm tall."
+    "size": "About 60cm tall.",
+    "art": {
+      "blooms": [
+        "lily",
+        "lily",
+        "sprig",
+        "lily"
+      ],
+      "seed": 9,
+      "tone": "ivory"
+    }
   },
   {
     "slug": "graduation-armful",
@@ -276,7 +341,18 @@
     "leadDays": 2,
     "lifespan": "About a week. Statice dries beautifully if you hang it upside down.",
     "care": "Give the sunflowers deep water; they are thirsty.",
-    "size": "About 45cm tall."
+    "size": "About 45cm tall.",
+    "art": {
+      "blooms": [
+        "daisy",
+        "daisy",
+        "sprig",
+        "daisy",
+        "sprig"
+      ],
+      "seed": 21,
+      "tone": "sun"
+    }
   },
   {
     "slug": "potted-orchid",
@@ -314,7 +390,16 @@
     "leadDays": 2,
     "lifespan": "Flowers for six to ten weeks.",
     "care": "Three ice cubes a week, bright indirect light, nothing more.",
-    "size": "About 50cm tall in its pot."
+    "size": "About 50cm tall in its pot.",
+    "art": {
+      "blooms": [
+        "orchid",
+        "orchid",
+        "sprig"
+      ],
+      "seed": 17,
+      "tone": "ivory"
+    }
   },
   {
     "slug": "the-keeper-rose",
@@ -357,7 +442,14 @@
     "care": "Dust with a soft brush. Keep out of strong sun so the colour stays true.",
     "size": "About 25cm tall in its vase.",
     "makeHours": 3,
-    "yarn": "Cotton yarn"
+    "yarn": "Cotton yarn",
+    "art": {
+      "blooms": [
+        "rose"
+      ],
+      "seed": 1,
+      "tone": "wine"
+    }
   },
   {
     "slug": "sunday-tulips",
@@ -401,7 +493,18 @@
     "care": "No water, no sun, no fuss. A gentle dust now and then.",
     "size": "About 30cm tall.",
     "makeHours": 10,
-    "yarn": "Cotton yarn"
+    "yarn": "Cotton yarn",
+    "art": {
+      "blooms": [
+        "tulip",
+        "tulip",
+        "tulip",
+        "tulip",
+        "tulip"
+      ],
+      "seed": 4,
+      "tone": "blush"
+    }
   },
   {
     "slug": "forever-graduation",
@@ -442,7 +545,18 @@
     "care": "Keep out of strong sun so the yellows stay bright.",
     "size": "About 35cm tall.",
     "makeHours": 14,
-    "yarn": "Cotton yarn"
+    "yarn": "Cotton yarn",
+    "art": {
+      "blooms": [
+        "daisy",
+        "daisy",
+        "daisy",
+        "sprig",
+        "daisy"
+      ],
+      "seed": 30,
+      "tone": "sun"
+    }
   },
   {
     "slug": "little-quartet",
@@ -484,7 +598,17 @@
     "care": "A gentle dust now and then.",
     "size": "About 20cm tall.",
     "makeHours": 5,
-    "yarn": "Cotton yarn"
+    "yarn": "Cotton yarn",
+    "art": {
+      "blooms": [
+        "daisy",
+        "daisy",
+        "daisy",
+        "daisy"
+      ],
+      "seed": 44,
+      "tone": "sage"
+    }
   },
   {
     "slug": "remembrance",
@@ -522,6 +646,17 @@
     "care": "Keep out of strong sun. Dust gently.",
     "size": "About 30cm tall.",
     "makeHours": 12,
-    "yarn": "Cotton yarn"
+    "yarn": "Cotton yarn",
+    "art": {
+      "blooms": [
+        "daisy",
+        "sprig",
+        "ruffle",
+        "sprig",
+        "daisy"
+      ],
+      "seed": 60,
+      "tone": "ivory"
+    }
   }
 ]

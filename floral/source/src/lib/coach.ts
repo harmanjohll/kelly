@@ -31,6 +31,7 @@ export const bespoke: Product = {
   lifespan: 'Whatever suits the moment.',
   care: '',
   size: '',
+  art: { blooms: ['sprig', 'rose', 'sprig'], seed: 99, tone: 'sage' },
 };
 
 const BUDGET_ORDER = { gentle: 0, considered: 1, generous: 2 } as const;
