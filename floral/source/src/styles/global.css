@@ -1,21 +1,22 @@
-/* Kelly: design tokens and base styles.
-   Shape rule: interactive controls (buttons, chips) are full pill; images and panels are 2px. */
+/* Kelly: design tokens and base styles. Direction "Botanical plate":
+   white paper, true black ink, one vermilion accent, watercolour washes, thin black rules.
+   Shape rule: everything square; no rounded corners. */
 
 :root {
-  --paper: #f1f2ec;
-  --paper-2: #e6e8df;
-  --ink: #18221d;
-  --ink-2: #4a554e;
-  --line: #c6ccc1;
-  --accent: #b23a5e;
-  --accent-ink: #fbf7f4;
-  --stem: #5f7466;
+  --paper: #fbfaf7;
+  --paper-2: #f1efe9;
+  --ink: #111111;
+  --ink-2: #4b4b4b;
+  --line: #111111;
+  --accent: #c73a1b;
+  --accent-ink: #ffffff;
+  --stem: #3f5a3c;
 
-  --bloom-blush: #e9a6b5;
-  --bloom-sun: #e8c25a;
-  --bloom-wine: #8e2c48;
-  --bloom-ivory: #dcd9c9;
-  --bloom-sage: #9fb39b;
+  --bloom-blush: #ef8ea6;
+  --bloom-sun: #f0b429;
+  --bloom-wine: #9b1d3f;
+  --bloom-ivory: #e9e2cf;
+  --bloom-sage: #7ea775;
 
   --serif: 'Cormorant Garamond', 'Iowan Old Style', Georgia, serif;
   --sans: 'Hanken Grotesk Variable', 'Hanken Grotesk', system-ui, sans-serif;
@@ -23,8 +24,8 @@
   --measure: 62ch;
   --wrap: 1240px;
   --gutter: clamp(16px, 4vw, 48px);
-  --pill: 999px;
-  --edge: 2px;
+  --pill: 0;
+  --edge: 0;
 
   --tempo: 1;
   --breath: 7s;
@@ -35,26 +36,26 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: #121814;
-    --paper-2: #1a221d;
-    --ink: #e8eae3;
-    --ink-2: #a9b2ab;
-    --line: #2f3a33;
-    --accent: #e58aa5;
-    --accent-ink: #1c1014;
-    --stem: #8fa597;
+    --paper: #121212;
+    --paper-2: #1c1c1b;
+    --ink: #f2f0eb;
+    --ink-2: #b3b0a8;
+    --line: #f2f0eb;
+    --accent: #ff6a45;
+    --accent-ink: #121212;
+    --stem: #8fae86;
 
-    --bloom-blush: #d48899;
-    --bloom-sun: #d2ab48;
-    --bloom-wine: #c25877;
-    --bloom-ivory: #8f8c7f;
-    --bloom-sage: #7f977c;
+    --bloom-blush: #d97f95;
+    --bloom-sun: #d9a228;
+    --bloom-wine: #c2456a;
+    --bloom-ivory: #8f8a7a;
+    --bloom-sage: #6f9367;
   }
 }
 
 /* The quiet register: for grief, apology and hard seasons the page slows and softens. */
 [data-register='quiet'] {
-  --accent: #5f7466;
+  --accent: #3f5a3c;
   --tempo: 1.8;
   --breath: 11s;
 }
@@ -78,9 +79,9 @@ body {
 img, svg { display: block; max-width: 100%; }
 a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 1px; }
 a:hover { color: var(--accent); }
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
-h1, h2, h3 { font-family: var(--serif); font-weight: 500; line-height: 1.08; letter-spacing: -0.01em; margin: 0; text-wrap: balance; }
+h1, h2, h3 { font-family: var(--serif); font-weight: 400; line-height: 1.08; letter-spacing: -0.01em; margin: 0; text-wrap: balance; }
 h1 { font-size: clamp(2.6rem, 6vw, 4.6rem); }
 h2 { font-size: clamp(2rem, 4vw, 3rem); }
 h3 { font-size: clamp(1.4rem, 2.4vw, 1.75rem); }
@@ -95,8 +96,8 @@ p { margin: 0 0 1em; max-width: var(--measure); text-wrap: pretty; }
 /* Buttons and chips */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 0.5em;
-  min-height: 48px; padding: 0 1.4em; border-radius: var(--pill);
-  font: 500 1rem/1 var(--sans); text-decoration: none; white-space: nowrap; cursor: pointer;
+  min-height: 52px; padding: 0 1.5em; border-radius: var(--pill);
+  font: 500 1rem/1 var(--sans); letter-spacing: 0.02em; text-decoration: none; white-space: nowrap; cursor: pointer;
   border: 1px solid var(--ink); background: var(--ink); color: var(--paper);
   transition: transform 0.15s var(--ease), background-color 0.2s ease, color 0.2s ease;
 }
@@ -107,7 +108,7 @@ p { margin: 0 0 1em; max-width: var(--measure); text-wrap: pretty; }
 .btn[disabled] { opacity: 0.45; cursor: not-allowed; }
 
 /* Illustrations */
-.art path, .threshold-art path { fill: none; stroke: var(--ink); stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round; }
+.art path, .threshold-art path { fill: none; stroke: var(--ink); stroke-width: 1; stroke-linecap: round; stroke-linejoin: round; }
 .art .shape, .threshold-art .shape { fill: color-mix(in srgb, var(--tone) 42%, var(--paper)); }
 .bloom.crochet path { stroke: color-mix(in srgb, var(--tone) 45%, var(--ink)); stroke-width: 2.4; stroke-dasharray: 3 2.6; }
 .art .bloom.crochet .shape, .threshold-art .bloom.crochet .shape { fill: color-mix(in srgb, var(--tone) 88%, var(--paper)); }
@@ -129,6 +130,6 @@ p { margin: 0 0 1em; max-width: var(--measure); text-wrap: pretty; }
 
 /* Photo slots: where Kelly's photographs will go. */
 .photo-slot {
-  border: 1px dashed var(--line); border-radius: var(--edge); background: var(--paper-2);
+  border: 1px solid var(--line); border-radius: var(--edge); background: var(--paper-2);
   display: grid; place-items: center; text-align: center; padding: 1.5rem; color: var(--ink-2); font-size: 0.875rem;
 }
