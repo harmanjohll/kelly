@@ -117,18 +117,22 @@
     let body = dust(rand, w, h, 90);
     const pick = {};
     for (const d of Object.keys(centre)) {
-      const list = d === 'english' ? allNodes('english').filter(n => n.deck === 'from-ideas') : allNodes(d).filter(n => (n.links || []).length >= 3).slice(0, 34);
+      const list = d === 'english' ? allNodes('english').filter(n => n.deck === 'from-ideas') : o.lit ? allNodes(d) : allNodes(d).filter(n => (n.links || []).length >= 3).slice(0, 34);
       pick[d] = list;
       list.forEach(n => { const r = rng(n.id); const a = r() * Math.PI * 2, rr = Math.sqrt(r()); pos[n.id] = { x: w * (centre[d][0] + .17 * rr * Math.cos(a)), y: h * (centre[d][1] + .2 * rr * Math.sin(a)), d }; });
     }
     let cross = '', inner = '';
     for (const d of Object.keys(pick)) for (const n of pick[d]) for (const l of n.links || []) {
       const a = pos[n.id], b = pos[l.to]; if (!a || !b) continue;
+      if (o.lit && !(o.lit[n.id] && o.lit[l.to])) continue;
       if (a.d === b.d) inner += `<line x1="${f(a.x)}" y1="${f(a.y)}" x2="${f(b.x)}" y2="${f(b.y)}" stroke="${VAR[a.d]}" stroke-opacity=".3" stroke-width=".8"/>`;
       else { const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2 - 30; cross += `<path d="M${f(a.x)},${f(a.y)}Q${f(mx)},${f(my)} ${f(b.x)},${f(b.y)}" fill="none" stroke="var(--accent-2)" stroke-opacity=".32" stroke-width=".9" stroke-dasharray="3 4"/>`; }
     }
     body += inner + cross;
-    for (const id of Object.keys(pos)) { const p = pos[id]; body += star(p.x, p.y, 1.3 + rand() * 1.5, VAR[p.d], rand() > .7); }
+    if (o.lit) {
+      // A personal sky: what she has visited shines, the rest waits faintly.
+      for (const id of Object.keys(pos)) { const p = pos[id]; const on = !!o.lit[id]; body += on ? star(p.x, p.y, 2.6, VAR[p.d], true) : `<circle cx="${f(p.x)}" cy="${f(p.y)}" r="1.4" fill="${VAR[p.d]}" opacity=".22"/>`; }
+    } else for (const id of Object.keys(pos)) { const p = pos[id]; body += star(p.x, p.y, 1.3 + rand() * 1.5, VAR[p.d], rand() > .7); }
     return svg(w, h, body);
   }
 

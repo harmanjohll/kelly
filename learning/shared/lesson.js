@@ -100,6 +100,7 @@
       $('#count', root).textContent = `${i + 1} / ${steps.length}`;
       $('#back', root).style.visibility = i ? 'visible' : 'hidden';
       const next = $('#next', root);
+      next.className = 'btn ' + (st.type === 'check' ? 'ghost' : 'dom');
       next.textContent = st.type === 'cover' ? 'Begin' : st.type === 'close' ? 'Back to the room' : st.type === 'check' ? 'Skip' : 'Next';
       const html = ({ cover, hook, idea, try: tryStep, check, bridge, close })[st.type](st);
       stage.innerHTML = `<div class="step${dir < 0 ? ' back' : ''}">${html}</div>`;
@@ -146,7 +147,7 @@
         <p class="stopline">Stop ${st.i + 1} · Check yourself</p>
         <p class="check-q">${esc(st.r.q)}</p>
         <p class="muted small" style="margin-top:14px">Answer in your head first.</p>
-        <button class="btn" id="reveal" style="margin-top:12px">Show the answer</button>
+        <button class="btn dom" id="reveal" style="margin-top:12px">Show the answer</button>
         <div id="ans" hidden><p class="check-a">${esc(st.r.a)}</p>
           <p class="muted small" style="margin-top:16px">How did that go? It will come back in your review accordingly.</p>
           <div class="rate"><button class="btn" data-g="0">Not yet</button><button class="btn" data-g="1">Shaky</button><button class="btn dom" data-g="2">Knew it</button></div></div>`;
@@ -189,7 +190,7 @@
         }).catch(() => { const h = $('#sim-host', stage); if (h) h.innerHTML = '<p class="muted small">The simulation could not load.</p>'; });
       }
       if (st.type === 'check') {
-        $('#reveal', stage).addEventListener('click', (e) => { e.target.remove(); $('#ans', stage).hidden = false; $('#next', root).textContent = 'Next'; });
+        $('#reveal', stage).addEventListener('click', (e) => { e.target.remove(); $('#ans', stage).hidden = false; const nx = $('#next', root); nx.textContent = 'Next'; nx.className = 'btn dom'; });
         stage.querySelector('.rate').addEventListener('click', (e) => {
           const b = e.target.closest('[data-g]'); if (!b) return;
           spaced.add(st.key); spaced.rate(st.key, Number(b.dataset.g));

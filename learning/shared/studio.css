@@ -462,7 +462,7 @@ details.drawer > .body { padding: 0 2px 18px; }
 .lesson .progress > i { display: block; height: 100%; background: var(--dom); box-shadow: 0 0 12px var(--dom); transition: width .35s var(--ease); }
 .lesson .crumb { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-top: 14px; font-family: var(--font-mono); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
 .lesson .crumb a { text-decoration: none; color: var(--muted); }
-.lesson .stage { flex: 1; display: flex; flex-direction: column; justify-content: center; padding-top: 28px; padding-bottom: 24px; }
+.lesson .stage { flex: 1; display: flex; flex-direction: column; justify-content: flex-start; padding-top: clamp(28px, 9vh, 96px); padding-bottom: 24px; }
 .lesson .step { animation: stepIn .35s var(--ease) both; }
 .lesson .step.back { animation-name: stepBack; }
 @keyframes stepIn { from { opacity: 0; transform: translateX(18px); } to { opacity: 1; transform: none; } }
