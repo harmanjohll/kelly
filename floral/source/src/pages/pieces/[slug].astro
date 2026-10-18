@@ -1,8 +1,8 @@
 ---
 import { url } from '../../lib/url';
 import Base from '../../layouts/Base.astro';
-import Art from '../../components/Art.astro';
 import { products } from '../../lib/coach';
+import { posterMarkup, lineLabel, lifespanMarkup } from '../../lib/poster';
 import { waLink, site } from '../../config/site';
 import flowerData from '../../data/flowers.json';
 import type { Product } from '../../lib/types';
@@ -12,7 +12,6 @@ export function getStaticPaths() {
 }
 
 const { product } = Astro.props as { product: Product };
-const lineLabel = { fresh: 'Fresh', forever: 'Crochet', stays: 'Fresh, with one crochet bloom', bespoke: 'Bespoke' }[product.line];
 const back = product.line === 'forever' ? { href: url('/forever/'), label: 'Forever' } : { href: url('/fleeting/'), label: 'Fleeting' };
 const traditionName: Record<string, string> = { victorian: 'Victorian', chinese: 'Chinese', japanese: 'Japanese', malay: 'Malay', indian: 'Indian', singapore: 'Singapore', general: 'Today', care: 'Care' };
 const flowers = product.flowers
@@ -25,68 +24,85 @@ const lead = product.line === 'forever' ? site.crochet.leadNote : product.line =
 ---
 <Base title={product.name} description={product.summary}>
   <article class="piece wrap">
-    <div class="art-col">
-      <Art product={product} />
-      <p class="small muted caption">An illustration. Kelly's photographs of this piece are coming.</p>
-    </div>
-    <div class="text-col">
-      <p class="small"><a href={back.href}>{back.label}</a></p>
+    <header class="piece-head">
+      <p class="crumb label"><a href={back.href}>{back.label}</a> / {lineLabel[product.line]}</p>
       <h1>{product.name}</h1>
-      <p class="muted line">{lineLabel}</p>
-      <p class="summary">{product.summary}</p>
-      <p>{product.story}</p>
-      <p class="price">{product.priceFrom ? `From S$${product.priceFrom}` : 'Price on request'}</p>
-      <div class="actions">
-        <a class="btn" href={ask} rel="noopener">Ask Kelly</a>
-        <a class="btn ghost" href={url('/consult/')}>Help me choose</a>
+    </header>
+
+    <div class="body">
+      <div class="visual">
+        <Fragment set:html={posterMarkup(product, { base: import.meta.env.BASE_URL, size: 'lg' })} />
+        {!product.photo && <p class="small muted caption">Kelly's photograph of this piece is coming.</p>}
       </div>
-      <p class="small muted">{lead}</p>
 
-      <h2>How it lives</h2>
-      <dl>
-        <div><dt>Lasts</dt><dd>{product.lifespan}</dd></div>
-        <div><dt>Care</dt><dd>{product.care}</dd></div>
-        <div><dt>Size</dt><dd>{product.size}</dd></div>
-        {product.makeHours && <div><dt>Made</dt><dd>About {product.makeHours} hours of crochet, in {product.yarn?.toLowerCase()}</dd></div>}
-      </dl>
-
-      {flowers.length > 0 && (
-        <>
-          <h2>What the flowers say</h2>
-          <div class="meanings">
-            {flowers.map((f) => (
-              <div>
-                <h3>{f.name}</h3>
-                {f.meanings.map(([k, v]) => <p><span class="muted small">{traditionName[k] ?? k}</span> {v}</p>)}
-              </div>
-            ))}
+      <div class="text">
+        <p class="summary voice">{product.summary}</p>
+        <p>{product.story}</p>
+        <div class="buy">
+          <p class="price">{product.priceFrom ? `From S$${product.priceFrom}` : 'Price on request'}</p>
+          <div class="actions">
+            <a class="btn" href={ask} rel="noopener">Ask Kelly</a>
+            <a class="btn ghost" href={url('/consult/')}>Help me choose</a>
           </div>
-          <p class="small muted">Meanings vary between families and sources. <a href={url('/meanings/')}>More on meanings</a></p>
-        </>
-      )}
+          <p class="small muted">{lead}</p>
+        </div>
+
+        <h2>How it lives</h2>
+        <div class="life-row" style="--pbg:transparent;--pink:currentColor">
+          <Fragment set:html={lifespanMarkup(product.line)} />
+        </div>
+        <dl class="facts">
+          <div><dt class="label">Lasts</dt><dd>{product.lifespan}</dd></div>
+          <div><dt class="label">Care</dt><dd>{product.care}</dd></div>
+          <div><dt class="label">Size</dt><dd>{product.size}</dd></div>
+          <div><dt class="label">Stems</dt><dd>{product.stems}</dd></div>
+          {product.makeHours && <div><dt class="label">Made</dt><dd>About {product.makeHours} hours of crochet, in {product.yarn?.toLowerCase()}</dd></div>}
+        </dl>
+
+        {flowers.length > 0 && (
+          <>
+            <h2>What the flowers say</h2>
+            <div class="meanings">
+              {flowers.map((f) => (
+                <div class="flower">
+                  <h3>{f.name}</h3>
+                  {f.meanings.map(([k, v]) => <p><span class="label muted">{traditionName[k] ?? k}</span> {v}</p>)}
+                </div>
+              ))}
+            </div>
+            <p class="small muted">Meanings vary between families and sources. <a href={url('/meanings/')}>More on meanings</a></p>
+          </>
+        )}
+      </div>
     </div>
   </article>
 </Base>
 
 <style>
-  .piece { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 5vw, 5rem); padding-top: clamp(1.5rem, 4vw, 3rem); align-items: start; }
-  .art-col { position: sticky; top: 1.5rem; }
+  .piece { padding-top: clamp(1.5rem, 4vw, 3rem); }
+  .crumb { margin-bottom: 0.75rem; }
+  .crumb a { text-decoration: none; border-bottom: 2px solid currentColor; }
+  .piece-head h1 { font-size: clamp(3.4rem, 11vw, 10rem); text-transform: uppercase; font-stretch: 70%; line-height: 0.86; margin-bottom: clamp(1.5rem, 4vw, 3rem); }
+  .body { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 5vw, 5rem); align-items: start; border-top: 2px solid var(--ink); padding-top: clamp(1.5rem, 3vw, 2.5rem); }
+  .visual { position: sticky; top: 1.5rem; }
   .caption { margin-top: 0.75rem; }
-  h1 { margin: 0.5rem 0 0.4rem; }
-  .line { margin-bottom: 1.5rem; }
-  .summary { font-size: 1.2rem; }
-  .price { font-family: var(--serif); font-size: 1.5rem; margin: 1.5rem 0 1rem; }
-  .actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 0.75rem; }
-  h2 { font-size: 1.9rem; margin: 3rem 0 1.25rem; }
-  dl { margin: 0; display: grid; gap: 0.9rem; }
-  dl div { display: grid; grid-template-columns: 5rem 1fr; gap: 1rem; }
-  dt { color: var(--ink-2); font-size: 0.875rem; padding-top: 0.15rem; }
+  .summary { font-size: clamp(1.4rem, 2.6vw, 1.9rem); line-height: 1.25; }
+  .buy { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 1.25rem 0; margin: 1.5rem 0 0; }
+  .price { font-family: var(--display); font-weight: 760; font-stretch: 90%; font-size: 1.8rem; margin-bottom: 0.9rem; }
+  .actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 0.9rem; }
+  h2 { font-size: clamp(1.9rem, 3.4vw, 2.6rem); text-transform: uppercase; margin: 3rem 0 1.25rem; }
+  .life-row :global(.life b) { font-size: 4rem; }
+  .life-row :global(.days i) { width: 14px; height: 3.2rem; }
+  .life-row { margin-bottom: 1.5rem; }
+  .facts { margin: 0; display: grid; gap: 0.85rem; }
+  .facts div { display: grid; grid-template-columns: 5.5rem 1fr; gap: 1rem; border-top: 1px solid var(--line); padding-top: 0.85rem; }
+  dt { padding-top: 0.2rem; }
   dd { margin: 0; }
   .meanings { display: grid; gap: 1.25rem; margin-bottom: 1rem; }
-  .meanings h3 { font-size: 1.35rem; margin-bottom: 0.3rem; }
-  .meanings p { margin: 0 0 0.3rem; }
+  .flower h3 { margin-bottom: 0.4rem; }
+  .flower p { margin: 0 0 0.35rem; }
   @media (max-width: 860px) {
-    .piece { grid-template-columns: 1fr; }
-    .art-col { position: static; max-width: 460px; }
+    .body { grid-template-columns: 1fr; }
+    .visual { position: static; max-width: 480px; }
   }
 </style>

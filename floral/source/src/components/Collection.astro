@@ -1,27 +1,35 @@
 ---
 import { url } from '../lib/url';
 import ProductCard from './ProductCard.astro';
+import WiltWord from './WiltWord.astro';
+import StitchWord from './StitchWord.astro';
 import type { Product } from '../lib/types';
-interface Props { title: string; intro: string; items: Product[]; facts: string[] }
-const { title, intro, items, facts } = Astro.props;
+interface Props { title: string; mode: 'wilt' | 'stitch'; intro: string; items: Product[]; facts: string[] }
+const { title, mode, intro, items, facts } = Astro.props;
 ---
 <section class="wrap col-head">
-  <h1><em>{title}</em></h1>
-  <p class="intro">{intro}</p>
-  <ul class="facts small muted">{facts.map((f) => <li>{f}</li>)}</ul>
+  {mode === 'wilt' ? <WiltWord word={title} tag="h1" class="col-title" /> : <StitchWord word={title} tag="h1" class="col-title" />}
+  <div class="col-sub">
+    <p class="intro">{intro}</p>
+    <ul class="facts">{facts.map((f) => <li>{f}</li>)}</ul>
+  </div>
 </section>
 <section class="wrap grid" aria-label={`${title} pieces`}>
   {items.map((p, i) => <ProductCard product={p} wide={i === 0} />)}
 </section>
 <section class="wrap unsure">
-  <p>Not sure which? <a href={url('/consult/')}>Help me choose</a></p>
+  <p>Not sure which?</p>
+  <a class="btn" href={url('/consult/')}>Help me choose</a>
 </section>
 <style>
-  .col-head { padding-top: clamp(2rem, 6vw, 4.5rem); padding-bottom: clamp(2rem, 5vw, 3.5rem); display: grid; gap: 1rem; }
-  .intro { font-size: 1.15rem; color: var(--ink-2); max-width: 46ch; margin: 0; }
-  .facts { list-style: none; padding: 0; margin: 0.5rem 0 0; display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; }
-  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1.5rem, 3vw, 2.5rem) clamp(1rem, 2.5vw, 2rem); }
-  .unsure { margin-top: 3.5rem; font-family: var(--serif); font-size: 1.6rem; }
-  @media (max-width: 960px) { .grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
+  .col-head { padding-top: clamp(1.5rem, 4vw, 3rem); padding-bottom: clamp(2rem, 5vw, 3.5rem); display: grid; gap: 1.5rem; }
+  .col-head :global(.col-title) { font-size: clamp(2.6rem, 15vw, 14rem); }
+  .col-sub { display: grid; grid-template-columns: 1.2fr 1fr; gap: 1rem 3rem; border-top: 2px solid var(--ink); padding-top: 1.25rem; }
+  .intro { font-family: var(--voice); font-style: italic; font-size: clamp(1.3rem, 2.4vw, 1.75rem); line-height: 1.25; margin: 0; max-width: 34ch; }
+  .facts { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.35rem; font-family: var(--display); font-weight: 600; font-stretch: 105%; }
+  .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(2rem, 4vw, 3.5rem) clamp(1rem, 2.5vw, 2rem); }
+  .unsure { margin-top: 4rem; display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.5rem; border-top: 2px solid var(--ink); padding-top: 1.5rem; }
+  .unsure p { margin: 0; font-family: var(--display); font-weight: 760; font-stretch: 80%; font-size: clamp(2rem, 4vw, 3rem); text-transform: uppercase; }
+  @media (max-width: 960px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } .col-sub { grid-template-columns: 1fr; } }
 </style>

@@ -41,16 +41,8 @@ export interface Product {
   size: string;
   makeHours?: number;
   yarn?: string;
-  art: ArtSpec;
+  photo?: string; // e.g. 'photos/sunday-tulips.jpg' under public/; replaces the typographic poster
 }
-
-export interface ArtSpec {
-  blooms: BloomKind[];
-  seed: number;
-  tone: 'blush' | 'sun' | 'wine' | 'ivory' | 'sage';
-}
-
-export type BloomKind = 'rose' | 'tulip' | 'daisy' | 'ruffle' | 'lily' | 'orchid' | 'sprig';
 
 export interface IntentionDef {
   id: Intention;
@@ -58,6 +50,8 @@ export interface IntentionDef {
   phrase: string;
   hint: string;
   register: 'open' | 'quiet';
+  color: string; // the colour field this intention floods the page with
+  ink: string; // text colour on that field, chosen for 4.5:1 contrast
 }
 
 export interface RuleMatch {

@@ -30,14 +30,14 @@ import Base from '../layouts/Base.astro';
 </Base>
 
 <style>
-  .story { max-width: 900px; padding-top: clamp(2rem, 6vw, 4.5rem); }
-  header { margin-bottom: 2.5rem; }
-  h1 { font-style: italic; font-size: clamp(3rem, 8vw, 5.5rem); }
-  .lede { font-size: 1.25rem; color: var(--ink-2); margin-top: 1rem; max-width: 40ch; }
+  .story { padding-top: clamp(1.5rem, 4vw, 3rem); }
+  header { margin-bottom: 2rem; }
+  h1 { font-size: clamp(4rem, 20vw, 19rem); text-transform: uppercase; font-stretch: 125%; font-weight: 880; line-height: 0.8; letter-spacing: -0.03em; }
+  .lede { font-family: var(--voice); font-style: italic; font-size: clamp(1.3rem, 2.6vw, 1.9rem); line-height: 1.25; margin-top: 1.5rem; max-width: 34ch; border-top: 2px solid var(--ink); padding-top: 1.25rem; }
   .portrait { aspect-ratio: 16 / 9; }
   .process { aspect-ratio: 3 / 2; margin: 2.5rem 0; }
-  .body { max-width: 640px; margin: 3rem auto 0; }
-  .note { background: var(--paper-2); padding: 1rem 1.25rem; border-left: 2px solid var(--accent); margin-bottom: 2.5rem; }
-  h2 { font-size: 1.9rem; margin: 2.5rem 0 0.75rem; }
-  .prompt { color: var(--ink-2); font-style: italic; font-family: var(--serif); font-size: 1.35rem; line-height: 1.45; }
+  .body { max-width: 720px; margin: 3rem auto 0; }
+  .note { border: 2px solid var(--ink); padding: 1rem 1.25rem; margin-bottom: 2.5rem; }
+  h2 { font-size: clamp(1.9rem, 3.6vw, 2.8rem); text-transform: uppercase; font-stretch: 75%; margin: 2.75rem 0 0.75rem; }
+  .prompt { font-family: var(--voice); font-style: italic; font-size: 1.4rem; line-height: 1.4; color: var(--ink-2); }
 </style>

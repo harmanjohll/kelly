@@ -1,11 +1,10 @@
 ---
-import { url } from '../lib/url';
-import '@fontsource/cormorant-garamond/400.css';
-import '@fontsource/cormorant-garamond/500.css';
-import '@fontsource/cormorant-garamond/400-italic.css';
+import '@fontsource-variable/anybody/standard.css';
 import '@fontsource-variable/hanken-grotesk';
+import '@fontsource-variable/newsreader/wght-italic.css';
 import '../styles/global.css';
 import { site, waLink } from '../config/site';
+import { url } from '../lib/url';
 
 interface Props {
   title?: string;
@@ -19,7 +18,7 @@ const nav = [
   { href: url('/fleeting/'), label: 'Fleeting' },
   { href: url('/forever/'), label: 'Forever' },
   { href: url('/meanings/'), label: 'Meanings' },
-  { href: url('/kelly/'), label: 'About Kelly' },
+  { href: url('/kelly/'), label: 'Kelly' },
 ];
 ---
 <!doctype html>
@@ -29,8 +28,8 @@ const nav = [
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
-    <meta name="theme-color" content="#f1f2ec" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#121814" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f1f1ec" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)" />
     <link rel="icon" href={url('/favicon.svg')} type="image/svg+xml" />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
@@ -64,23 +63,21 @@ const nav = [
     <footer class="foot">
       <div class="wrap foot-grid">
         <div>
-          <p class="foot-mark">Kelly</p>
-          <p class="muted">{site.tagline} Every piece is made by Kelly in Singapore.</p>
+          <h2 class="foot-h label">How ordering works</h2>
+          <p class="small">Choose a piece, or let the consultation help. Your brief goes to Kelly on WhatsApp. {site.payment}</p>
         </div>
         <div>
-          <h2 class="foot-h">How ordering works</h2>
-          <p class="muted small">Choose a piece, or let the consultation help. Your brief goes to Kelly on WhatsApp. {site.payment}</p>
-          <p class="muted small">Fresh flowers are delivered on {site.fresh.deliveryDays.join(' and ')}; order by {site.fresh.orderBy}. {site.crochet.leadNote}</p>
+          <h2 class="foot-h label">When</h2>
+          <p class="small">Fresh flowers arrive on {site.fresh.deliveryDays.join(' and ')}; order by {site.fresh.orderBy}. {site.crochet.leadNote}</p>
         </div>
         <div>
-          <h2 class="foot-h">Promises</h2>
-          <p class="muted small">The price Kelly quotes is the price you pay, delivery included. No countdown timers. Your recipient's details are used only to deliver their flowers.</p>
+          <h2 class="foot-h label">Promises</h2>
+          <p class="small">The price Kelly quotes is the price you pay, delivery included. No countdown timers. Your recipient's details are used only to deliver their flowers.</p>
           <p class="small"><a href={waLink('Hello Kelly, I have a question.')} rel="noopener">Message Kelly on WhatsApp</a>{site.instagram && <> · <a href={`https://instagram.com/${site.instagram}`} rel="noopener">Instagram</a></>}</p>
         </div>
       </div>
-      <div class="wrap foot-base small muted">
-        <p>The drawings on this site stand in for Kelly's photographs, which are coming.</p>
-      </div>
+      <p class="wordmark" aria-hidden="true">Kelly</p>
+      <p class="wrap small foot-note">Every piece is made by Kelly in Singapore. Photographs of the work are coming; until then the site speaks in type.</p>
     </footer>
 
     <script>
@@ -93,30 +90,34 @@ const nav = [
 </html>
 
 <style>
-  .draft { background: var(--paper-2); color: var(--ink-2); font-size: 0.8125rem; text-align: center; padding: 0.5rem var(--gutter); }
+  .draft { background: var(--ink); color: var(--paper); font-size: 0.8125rem; text-align: center; padding: 0.45rem var(--gutter); }
   .skip:focus { position: static; width: auto; height: auto; clip: auto; margin: 0; padding: 0.5rem 1rem; }
-  .top { display: flex; align-items: center; gap: 2rem; height: 72px; }
-  .mark { font-family: var(--serif); font-style: italic; font-size: 2rem; text-decoration: none; line-height: 1; padding-bottom: 0.1em; }
+  .top { display: flex; align-items: center; gap: 2rem; height: 76px; border-bottom: 1px solid var(--line); }
+  .mark { font-family: var(--display); font-weight: 860; font-stretch: 60%; font-size: 2.1rem; letter-spacing: -0.02em; text-transform: uppercase; text-decoration: none; line-height: 1; }
   nav { margin-left: auto; }
-  .links { display: flex; gap: 1.75rem; list-style: none; margin: 0; padding: 0; }
-  .links a { text-decoration: none; font-size: 0.95rem; }
-  .links a[aria-current='page'] { text-decoration: underline; }
+  .links { display: flex; gap: 1.6rem; list-style: none; margin: 0; padding: 0; }
+  .links a { font-family: var(--display); font-stretch: 105%; font-weight: 560; text-decoration: none; font-size: 0.98rem; }
+  .links a:hover, .links a[aria-current='page'] { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 0.3em; }
   .menu { display: none; position: relative; }
-  .menu summary { cursor: pointer; list-style: none; padding: 0.5rem 0; }
+  .menu summary { cursor: pointer; list-style: none; padding: 0.75rem 0; font-family: var(--display); font-weight: 600; }
   .menu summary::-webkit-details-marker { display: none; }
-  .menu ul { position: absolute; right: 0; top: 2.5rem; z-index: 20; list-style: none; margin: 0; padding: 1rem 1.25rem; background: var(--paper); border: 1px solid var(--line); border-radius: var(--edge); min-width: 12rem; display: grid; gap: 0.75rem; }
-  .menu a { text-decoration: none; }
+  .menu ul { position: absolute; right: 0; top: 2.75rem; z-index: 20; list-style: none; margin: 0; padding: 1rem 1.25rem; background: var(--paper); border: 2px solid var(--ink); min-width: 12rem; display: grid; gap: 0.25rem; }
+  .menu a { display: block; padding: 0.5rem 0; text-decoration: none; font-family: var(--display); font-weight: 650; font-size: 1.2rem; }
   @media (max-width: 860px) {
     .links { display: none; }
     .menu { display: block; }
     .top { gap: 1rem; height: 64px; }
-    .nav-cta { min-height: 40px; padding: 0 1em; font-size: 0.9rem; }
+    .nav-cta { min-height: 44px; padding: 0 1em; font-size: 0.9rem; }
   }
 
-  .foot { margin-top: clamp(4rem, 10vw, 8rem); border-top: 1px solid var(--line); padding-top: 3rem; }
-  .foot-grid { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 2.5rem; }
-  .foot-mark { font-family: var(--serif); font-style: italic; font-size: 2.25rem; line-height: 1; margin-bottom: 0.75rem; }
-  .foot-h { font-family: var(--sans); font-size: 0.95rem; font-weight: 600; margin-bottom: 0.6rem; }
-  .foot-base { padding-top: 2rem; padding-bottom: 2.5rem; }
-  @media (max-width: 760px) { .foot-grid { grid-template-columns: 1fr; gap: 1.75rem; } }
+  .foot { margin-top: clamp(5rem, 12vw, 9rem); border-top: 2px solid var(--ink); padding-top: 2.5rem; overflow: hidden; }
+  .foot-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.5rem; }
+  .foot-h { margin-bottom: 0.6rem; line-height: 1.2; }
+  .wordmark {
+    margin: 2.5rem 0 0; max-width: none; text-align: center; line-height: 0.78;
+    font-family: var(--display); font-weight: 880; font-stretch: 150%; text-transform: uppercase;
+    font-size: 21vw; letter-spacing: -0.03em; transform: translateY(0.1em); white-space: nowrap;
+  }
+  .foot-note { padding-top: 1.25rem; padding-bottom: 1.5rem; color: var(--ink-2); border-top: 1px solid var(--line); margin-top: 0; max-width: var(--wrap); }
+  @media (max-width: 760px) { .foot-grid { grid-template-columns: 1fr; gap: 1.5rem; } }
 </style>
