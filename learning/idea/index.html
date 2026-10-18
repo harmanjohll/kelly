@@ -5,44 +5,53 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Idea</title>
 <meta name="description" content="An idea card: what it is, how it connects, and room to think.">
+<meta name="theme-color" content="#0b1120">
 <link rel="stylesheet" href="../shared/studio.css">
 <link rel="icon" href="../shared/icon.svg" type="image/svg+xml">
 <style>
-  .mini { width: 100%; height: 300px; display: block; }
-  .mini text { font-size: 11px; fill: var(--ink); paint-order: stroke; stroke: var(--surface); stroke-width: 3px; stroke-linejoin: round; }
-  .mini a:hover circle { stroke: var(--ink); stroke-width: 2; }
-  .conn-wrap { display: flex; gap: 8px; align-items: flex-start; }
-  .conn-wrap .conn { flex: 1; }
-  .probe { margin-top: 10px; flex: none; }
-  .journey { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; background: color-mix(in srgb, var(--dom) 8%, var(--surface)); margin-top: 14px; font-size: .9rem; }
-  .recall-a { display: none; margin-top: 6px; color: var(--ink); }
-  .recall-a.on { display: block; }
+  .card-head { padding: 28px 0 6px; position: relative; isolation: isolate; }
+  .card-head .crumbs { font-family: var(--font-mono); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+  .card-head .crumbs a { color: var(--muted); text-decoration: none; }
+  .card-head .crumbs a:hover { color: var(--dom); }
+  .card-head h1 { font-size: clamp(2.2rem, 9vw, 3.6rem); max-width: 18ch; }
+  .card-head .neigh { position: absolute; z-index: -1; right: -20px; top: 0; width: 60%; height: 100%; opacity: .55; pointer-events: none; -webkit-mask-image: radial-gradient(closest-side, #000 40%, transparent); mask-image: radial-gradient(closest-side, #000 40%, transparent); }
+  .mini { width: 100%; height: 360px; display: block; overflow: visible; }
+  .mini text { font-family: var(--font-body); font-size: 12px; fill: var(--ink-2); paint-order: stroke; stroke: var(--bg); stroke-width: 4px; stroke-linejoin: round; }
+  .mini .me { font-family: var(--font-display); font-weight: 600; font-size: 15px; fill: var(--ink); }
+  .mini a:hover text { fill: var(--ink); }
+  .recall { border-bottom: 1px solid var(--line); padding: 16px 2px; }
+  .recall .q { font-family: var(--font-display); font-size: 1.15rem; line-height: 1.35; }
+  .recall .a { display: none; margin-top: 10px; font-family: var(--font-read); font-size: 1.04rem; color: var(--ink-2); }
+  .recall .a.on { display: block; }
+  .jlink { display: block; margin: 0 0 10px; color: var(--dom); text-decoration: none; font-family: var(--font-display); font-weight: 600; font-size: 1.02rem; line-height: 1.3; }
+  .jlink:hover { text-decoration: underline; }
+  .journey-bar { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 16px; border: 1px solid color-mix(in srgb, var(--dom) 30%, var(--line)); background: color-mix(in srgb, var(--dom) 7%, var(--surface)); margin: 28px 0; }
+  .journey-bar .grow { flex: 1; min-width: 0; }
 </style>
 </head>
 <body data-tab="explore" data-back="../explore/">
-<main class="wrap" id="app"></main>
+<main class="wrap" id="app" style="max-width:1000px"></main>
 <script src="../shared/core.js"></script>
 <script src="../shared/content/philosophy.js"></script>
 <script src="../shared/content/physics.js"></script>
 <script src="../shared/content/psychology.js"></script>
 <script src="../shared/content/english.js"></script>
+<script src="../shared/motif.js"></script>
 <script>
 (function () {
   const { $, esc, rich, param, node, neighbours, linkLabel, nodeHref, DOMAINS, data, store, spaced, ROOT, domainOf, playBtn } = KLS;
   const app = $('#app');
-  const id = param('id');
-  const n = node(id);
+  const n = node(param('id'));
   if (!n) { app.innerHTML = '<div class="empty"><p>That idea was not found.</p><a class="btn" href="../explore/">Explore</a></div>'; return; }
   const d = n.domain;
   const D = data(d) || {};
   document.body.dataset.domain = d;
   document.body.dataset.title = DOMAINS[d].name;
   document.body.dataset.back = '../' + DOMAINS[d].href;
-  document.querySelector('.topbar .name') && (document.querySelector('.topbar .name').textContent = DOMAINS[d].name);
-  const backEl = document.querySelector('.topbar .back'); if (backEl) backEl.href = '../' + DOMAINS[d].href;
   document.title = n.title;
   KLS.markSeen(n.id);
 
+  const PERSON = new Set(['thinker', 'psychologist', 'physicist']);
   const mod = (D.modules || []).find(m => m.id === param('m'));
   const pos = mod ? mod.path.indexOf(n.id) : -1;
   const facetLabel = (fid, vid) => { const f = (D.facets || []).find(x => x.id === fid); const v = f && f.values.find(x => x.id === vid); return v ? v.label : vid; };
@@ -50,129 +59,130 @@
   const S = store.get();
   const recallKeys = (n.recall || []).map((_, i) => `node:${n.id}:${i}`);
   const inReview = () => recallKeys.length && recallKeys.every(k => spaced.has(k));
+  const people = (n.people || []).map(node).filter(Boolean);
+  const journeys = (D.modules || []).filter(m => m.path.includes(n.id));
 
   function badge() {
     let h = '';
-    if (n.evidence) h += `<span class="badge ev-${n.evidence}">${n.evidence === 'failed' ? 'Failed to replicate' : n.evidence[0].toUpperCase() + n.evidence.slice(1) + ' evidence'}</span>`;
+    if (n.evidence) h += `<span class="badge ev-${n.evidence}">${n.evidence === 'failed' ? 'Failed to replicate' : n.evidence + ' evidence'}</span>`;
     if (n.status) h += `<span class="badge st-${n.status}">${n.status === 'settled' ? 'Settled science' : n.status === 'interpretation' ? 'Interpretation' : 'Open question'}</span>`;
     return h;
   }
-  function stepLink(i, label) {
-    if (!mod || i < 0 || i >= mod.path.length) return '';
-    return `<a class="btn small ${label === 'Next' ? 'primary dom' : ''}" href="${nodeHref(mod.path[i])}&m=${encodeURIComponent(mod.id)}">${label}</a>`;
-  }
-
-  // Group connections by how they relate.
   const groups = {};
   nb.forEach(x => { const l = linkLabel(x.type, x.dir); (groups[l] = groups[l] || []).push(x); });
-  const connHtml = Object.entries(groups).map(([label, list]) => `
-    <p class="kicker" style="margin:16px 0 2px">${esc(label)}</p>
-    ${list.map(x => { const t = node(x.id); const cross = domainOf(x.id) !== d; return `<div class="conn-wrap">
-      <a class="conn${cross ? ' cross' : ''}" href="${nodeHref(x.id)}" style="--c:var(${DOMAINS[t.domain].colourVar})">
-        <span class="dot"></span><span><div class="t">${esc(t.title)}</div>${cross ? `<div class="type">${esc(DOMAINS[t.domain].name)}</div>` : ''}<div class="why">${esc(x.why || '')}</div></span>
-      </a><button class="btn ghost small probe" data-probe="${esc(x.id)}" aria-label="Explain this link in your own words">Why?</button></div>`; }).join('')}`).join('');
-
-  const people = (n.people || []).map(node).filter(Boolean);
 
   app.innerHTML = `
-    ${mod ? `<div class="journey"><span class="grow" style="flex:1"><span class="muted">Journey</span> · ${esc(mod.title)} · ${pos + 1} of ${mod.path.length}</span>${stepLink(pos - 1, 'Back')}</div>` : ''}
-    <article class="page-head">
-      <p class="kicker dom">${esc(DOMAINS[d].name)} · ${esc(n.kindLabel || n.kind)}</p>
+    <header class="card-head">
+      <div class="neigh">${KLSMotif.room(d, { w: 500, h: 400, seed: n.id, word: n.title })}</div>
+      <nav class="crumbs" aria-label="Where this sits"><a href="../${DOMAINS[d].href}">${esc(DOMAINS[d].name)}</a>${mod ? `<span>/</span><a href="../learn/?j=${encodeURIComponent(mod.id)}">${esc(mod.title)}</a>` : ''}</nav>
+      <p class="eyebrow dom">${esc(n.kindLabel || n.kind)}${n.life ? ` · ${esc(n.life)}` : ''}</p>
       <h1>${esc(n.title)}</h1>
-      ${n.say ? `<p class="say">${playBtn(n.say.text || n.title)}<span class="respell">${esc(n.say.respell || '')}</span><span class="ipa">/${esc(n.say.ipa || '')}/</span></p>` : ''}
-      ${n.life || n.place ? `<p class="muted small" style="margin:.2rem 0 .6rem">${esc([n.life, n.place].filter(Boolean).join(' · '))}</p>` : ''}
-      <p class="lede">${esc(n.line)}</p>
-      <div class="row" style="margin:10px 0 4px">${badge()}
-        ${Object.entries(n.facets || {}).map(([f, vs]) => vs.map(v => `<span class="tag">${esc(facetLabel(f, v))}</span>`).join('')).join('')}
-      </div>
-      <div class="row" style="margin-top:12px">
+      ${n.say ? `<p class="say" style="margin:.2rem 0 .8rem">${playBtn(n.say.text || n.title)}<span class="respell">${esc(n.say.respell || '')}</span><span class="ipa">/${esc(n.say.ipa || '')}/</span></p>` : ''}
+      <p class="tagline" style="margin-top:.4rem">${esc(n.line)}</p>
+      ${n.place ? `<p class="muted small" style="margin-top:8px">${esc(n.place)}</p>` : ''}
+      <div class="row" style="margin-top:16px">${badge()}</div>
+      <div class="row" style="margin-top:16px">
         <button class="btn small" id="save">${S.saved[n.id] ? 'Saved' : 'Save'}</button>
         ${recallKeys.length ? `<button class="btn small" id="rev">${inReview() ? 'In your review' : 'Add to review'}</button>` : ''}
-        <a class="btn small" href="${ROOT}web/?d=${d}&focus=${encodeURIComponent(n.id)}">See in the web</a>
+        <a class="btn ghost small" href="${ROOT}web/?d=${d}&mode=focus&focus=${encodeURIComponent(n.id)}">See it in the web</a>
       </div>
-    </article>
+    </header>
 
-    <div class="prose">${(n.body || []).map(p => `<p>${rich(p)}</p>`).join('')}</div>
-    ${n.evidenceNote ? `<p class="notice"><b>About the evidence.</b> ${esc(n.evidenceNote)}</p>` : ''}
-    ${n.sim ? `<div id="sim" style="margin:22px 0"><p class="kicker">Simulation</p><div id="sim-host"><p class="muted small">Loading simulation...</p></div><ul class="sim-try" id="sim-try"></ul></div>` : ''}
-    ${(n.maths || []).length ? `<details class="drawer"><summary>The maths, if you want it</summary><div class="body">${n.maths.map(m => `<div class="maths">${esc(m)}</div>`).join('')}</div></details>` : ''}
-    ${n.quote ? `<blockquote class="quote">${esc(n.quote.text)}<cite>${esc(n.quote.source)}</cite></blockquote>` : ''}
-    ${n.objection ? `<section><h2>The best objection</h2><p class="prose">${esc(n.objection)}</p></section>` : ''}
+    <div class="tabs" role="tablist">
+      <button role="tab" id="t-read" aria-controls="p-read" aria-selected="true">Read</button>
+      <button role="tab" id="t-connect" aria-controls="p-connect" aria-selected="false">Connections<span class="n">${nb.length}</span></button>
+      <button role="tab" id="t-practise" aria-controls="p-practise" aria-selected="false">Practise</button>
+    </div>
 
-    ${people.length ? `<section><h2>People</h2><div class="row">${people.map(p => `<a class="chip" href="${nodeHref(p.id)}">${esc(p.title)}</a>`).join('')}</div></section>` : ''}
-
-    <section>
-      <h2>Connections</h2>
-      <p class="muted small">Tap <b>Why?</b> to explain a link in your own words and get a response from the Coach.</p>
-      ${nb.length ? `<svg class="mini" id="mini" viewBox="-200 -150 400 300" aria-label="Neighbourhood"></svg>` : ''}
-      ${connHtml || '<p class="muted">No connections yet.</p>'}
-    </section>
-
-    ${(n.prompts || []).length ? `<section><h2>Sit with this</h2>${n.prompts.map(p => `<p class="card tint">${esc(p)}</p>`).join('')}</section>` : ''}
-
-    ${(n.recall || []).length ? `<section><h2>Check yourself</h2><p class="muted small">Answer in your head first, then reveal.</p>
-      <div class="list">${n.recall.map((r, i) => `<div class="item" style="display:block"><div>${esc(r.q)}</div><button class="btn ghost small" data-reveal="${i}" style="margin:6px 0 0 -10px">Reveal</button><div class="recall-a" id="ra-${i}">${esc(r.a)}</div></div>`).join('')}</div>
-    </section>` : ''}
-
-    <section>
-      <h2>Explain it back</h2>
-      <p class="muted small">Explain ${esc(n.title)} as if to a friend over coffee. Plain words. The Coach will say what is solid, what is missing, and ask one question.</p>
-      <textarea class="input" id="ex" maxlength="1500" placeholder="In my own words..."></textarea>
-      <div class="row" style="margin-top:10px"><button class="btn primary dom" id="ex-go">Get feedback</button><span class="muted small" id="ex-n"></span></div>
-      <div id="ex-out" class="coach" style="margin-top:12px;display:none"></div>
-    </section>
-
-    <section>
-      <h2>Talk it through</h2>
-      <p class="muted small">Ask anything about this idea, or push back on it. The Coach answers briefly and asks you something in return.</p>
-      <div class="coach"><div id="chat"></div>
-        <div class="row" style="margin-top:8px;flex-wrap:nowrap"><input class="input" id="say" maxlength="300" placeholder="Your question or thought"><button class="btn primary dom" id="say-go">Send</button></div>
+    <div role="tabpanel" id="p-read" aria-labelledby="t-read">
+      <div class="cornell">
+        <aside class="cue">
+          ${(n.prompts || []).length ? `<div class="block"><h4>Questions to hold</h4>${n.prompts.map(p => `<p class="q">${esc(p)}</p>`).join('')}</div>` : ''}
+          ${people.length ? `<div class="block"><h4>People</h4><div class="chips wrap-ok">${people.map(p => `<a class="chip" href="${nodeHref(p.id)}">${esc(p.title)}</a>`).join('')}</div></div>` : ''}
+          ${journeys.length ? `<div class="block"><h4>On these journeys</h4>${journeys.map(m => `<a class="jlink" href="../learn/?j=${encodeURIComponent(m.id)}">${esc(m.title)} →</a>`).join('')}</div>` : ''}
+          <div class="block"><h4>Where it sits</h4><p class="small muted" style="margin:0">${Object.entries(n.facets || {}).map(([f, vs]) => vs.map(v => esc(facetLabel(f, v))).join(', ')).join(' · ')}</p></div>
+        </aside>
+        <div class="main">
+          <div class="prose">${(n.body || []).map(p => `<p>${rich(p)}</p>`).join('')}</div>
+          ${n.evidenceNote ? `<div class="callout" style="margin:20px 0"><p class="eyebrow dom">About the evidence</p><p>${esc(n.evidenceNote)}</p></div>` : ''}
+          ${n.sim ? `<div id="sim" style="margin:28px 0"><p class="eyebrow dom">Try it</p><div id="sim-host"><p class="muted small">Loading simulation...</p></div><ul class="sim-try" id="sim-try"></ul></div>` : ''}
+          ${(n.maths || []).length ? `<details class="drawer"><summary>The maths, if you want it</summary><div class="body">${n.maths.map(m => `<div class="maths">${esc(m)}</div>`).join('')}</div></details>` : ''}
+          ${n.quote ? `<blockquote class="quote">${esc(n.quote.text)}<cite>${esc(n.quote.source)}</cite></blockquote>` : ''}
+          ${n.objection ? `<div class="callout" style="margin:24px 0"><p class="eyebrow dom">The best objection</p><p>${esc(n.objection)}</p></div>` : ''}
+          ${(n.further || []).length ? `<details class="drawer"><summary>Further reading</summary><div class="body"><ul style="margin:0;padding-left:18px">${n.further.map(f => `<li style="margin:6px 0">${rich(f)}</li>`).join('')}</ul></div></details>` : ''}
+        </div>
+        <div class="summary"><p class="eyebrow plain">In one line</p><p>${esc(n.line)}</p></div>
       </div>
-    </section>
+    </div>
 
-    ${(n.further || []).length ? `<section><h2>Further reading</h2><ul>${n.further.map(f => `<li>${rich(f)}</li>`).join('')}</ul></section>` : ''}
+    <div role="tabpanel" id="p-connect" aria-labelledby="t-connect" hidden>
+      <p class="muted" style="max-width:36em">Ideas mean most in company. Each line says why two ideas belong together. Tap <b>Why?</b> to put it in your own words first.</p>
+      ${nb.length ? `<svg class="mini" id="mini" viewBox="-260 -170 520 340" aria-label="This idea and its neighbours"></svg>` : ''}
+      ${Object.entries(groups).map(([label, list]) => `
+        <p class="eyebrow plain" style="margin:24px 0 2px">${esc(label)}</p>
+        ${list.map(x => { const t = node(x.id); const cross = domainOf(x.id) !== d; return `<div class="conn-wrap">
+          <a class="conn${cross ? ' cross' : ''}" href="${nodeHref(x.id)}" style="--c:var(${DOMAINS[t.domain].colourVar})">
+            <span class="dot"></span><span><div class="t">${esc(t.title)}</div>${cross ? `<div class="type">${esc(DOMAINS[t.domain].name)}</div>` : ''}<div class="why">${esc(x.why || '')}</div></span>
+          </a><button class="btn ghost small probe" data-probe="${esc(x.id)}" aria-label="Explain this link in your own words">Why?</button></div>`; }).join('')}`).join('') || '<p class="muted">No connections yet.</p>'}
+    </div>
 
-    <div class="row" style="justify-content:space-between;margin:30px 0 10px">
-      ${mod ? stepLink(pos - 1, 'Back') || '<span></span>' : '<span></span>'}
-      ${mod ? (pos < mod.path.length - 1 ? stepLink(pos + 1, 'Next') : `<a class="btn primary dom" href="../${DOMAINS[d].href}">Journey complete</a>`) : (nb.length ? `<a class="btn" id="wander" href="${nodeHref(KLS.dailyPick(nb, n.id + Date.now()).id)}">Wander to a neighbour</a>` : '')}
-    </div>`;
+    <div role="tabpanel" id="p-practise" aria-labelledby="t-practise" hidden>
+      ${(n.recall || []).length ? `<section><h2>Check yourself</h2><p class="muted small">Answer in your head first, then reveal.</p>
+        <div style="border-top:1px solid var(--line)">${n.recall.map((r, i) => `<div class="recall"><div class="q">${esc(r.q)}</div><button class="btn ghost small" data-reveal="${i}" style="margin:8px 0 0 -12px">Reveal</button><div class="a" id="ra-${i}">${esc(r.a)}</div></div>`).join('')}</div></section>` : ''}
+      <section>
+        <h2>Explain it back</h2>
+        <p class="muted small" style="max-width:36em">Explain ${esc(n.title)} as you would to a friend over coffee. Plain words. The Coach will say what is solid, what is missing, and ask one question.</p>
+        <textarea class="input" id="ex" maxlength="1500" placeholder="In my own words..."></textarea>
+        <div class="row" style="margin-top:10px"><button class="btn dom" id="ex-go">Get feedback</button><span class="muted small" id="ex-n"></span></div>
+        <div id="ex-out" class="coach" style="margin-top:12px;display:none"></div>
+      </section>
+      <section>
+        <h2>Talk it through</h2>
+        <p class="muted small" style="max-width:36em">Ask anything, or push back. The Coach answers briefly and asks you something in return.</p>
+        <div class="coach"><div id="chat"></div>
+          <div class="row" style="margin-top:8px;flex-wrap:nowrap"><input class="input" id="say" maxlength="300" placeholder="Your question or thought"><button class="btn dom" id="say-go">Send</button></div>
+        </div>
+      </section>
+    </div>
 
-  // Save and review.
+    ${mod ? `<div class="journey-bar"><span class="grow"><span class="eyebrow dom plain" style="margin:0">On the journey</span><span class="display" style="font-size:1.1rem;font-weight:600">${esc(mod.title)}</span> <span class="muted small">· stop ${pos + 1} of ${mod.path.length}</span></span><a class="btn dom small" href="../learn/?j=${encodeURIComponent(mod.id)}">Back to the journey</a></div>` : ''}
+    <p class="footer-note">${esc(DOMAINS[d].name)} · ${esc(n.kindLabel || '')}</p>`;
+
+  // Tabs.
+  const tabs = ['read', 'connect', 'practise'];
+  function showTab(t) {
+    tabs.forEach(x => { $('#t-' + x).setAttribute('aria-selected', String(x === t)); $('#p-' + x).hidden = x !== t; });
+    history.replaceState(null, '', '#' + t);
+  }
+  tabs.forEach(t => $('#t-' + t).addEventListener('click', () => showTab(t)));
+  if (tabs.includes(location.hash.slice(1))) showTab(location.hash.slice(1));
+
   $('#save').addEventListener('click', e => { const on = KLS.toggleSaved(n.id); e.target.textContent = on ? 'Saved' : 'Save'; KLS.toast(on ? 'Saved to You' : 'Removed'); });
   const rev = $('#rev');
   if (rev) rev.addEventListener('click', () => {
     if (inReview()) { recallKeys.forEach(spaced.remove); rev.textContent = 'Add to review'; KLS.toast('Removed from review'); }
     else { recallKeys.forEach(spaced.add); rev.textContent = 'In your review'; KLS.toast('Added. It will come back when it is due.'); }
   });
-  app.addEventListener('click', e => {
-    const r = e.target.closest('[data-reveal]');
-    if (r) { $('#ra-' + r.dataset.reveal).classList.add('on'); r.remove(); }
-  });
+  app.addEventListener('click', e => { const r = e.target.closest('[data-reveal]'); if (r) { $('#ra-' + r.dataset.reveal).classList.add('on'); r.remove(); } });
 
-  // Mini neighbourhood map: plain SVG, no library.
+  // The neighbourhood as a small constellation: plain SVG.
   const mini = $('#mini');
   if (mini) {
-    const list = nb.slice(0, 14);
-    const R = 110;
-    const colour = (x) => `var(${DOMAINS[x.domain].colourVar})`;
-    const short = (s) => s.length > 20 ? s.slice(0, 19) + '…' : s;
-    mini.innerHTML = list.map((x, i) => {
-      const a = -Math.PI / 2 + i * 2 * Math.PI / list.length; const t = node(x.id);
-      const px = R * 1.25 * Math.cos(a), py = R * Math.sin(a);
-      const cross = t.domain !== d;
-      return `<line x1="0" y1="0" x2="${px}" y2="${py}" stroke="${cross ? 'var(--accent-2)' : 'var(--line)'}" ${cross ? 'stroke-dasharray="4 4"' : ''} stroke-width="1.2"/>`;
-    }).join('') + list.map((x, i) => {
-      const a = -Math.PI / 2 + i * 2 * Math.PI / list.length; const t = node(x.id);
-      const px = R * 1.25 * Math.cos(a), py = R * Math.sin(a);
-      return `<a href="${nodeHref(t.id)}"><circle cx="${px}" cy="${py}" r="6.5" fill="${colour(t)}" stroke="var(--surface)" stroke-width="1.5"/><text x="${px}" y="${py + (py < 0 ? -11 : 19)}" text-anchor="middle">${esc(short(t.title))}</text></a>`;
-    }).join('') + `<circle r="12" fill="${colour(n)}"/><text y="28" text-anchor="middle" style="font-weight:600;font-size:12px">${esc(short(n.title))}</text>`;
+    const list = nb.slice(0, 16);
+    const col = (x) => `var(${DOMAINS[x.domain].colourVar})`;
+    const short = (s) => { const k = innerWidth < 600 ? 17 : 22; return s.length > k ? s.slice(0, k - 1) + '\u2026' : s; };
+    const narrow = innerWidth < 600;
+    if (narrow) mini.setAttribute('viewBox', '-185 -175 370 350');
+    const RX = narrow ? 128 : 200, RY = narrow ? 138 : 125;
+    const P = list.map((x, i) => { const a = -Math.PI / 2 + i * 2 * Math.PI / list.length; const t = node(x.id); return { t, x: RX * Math.cos(a), y: RY * Math.sin(a), cross: t.domain !== d }; });
+    mini.innerHTML = P.map(p => `<line x1="0" y1="0" x2="${p.x}" y2="${p.y}" stroke="${p.cross ? 'var(--accent-2)' : col(p.t)}" stroke-opacity="${p.cross ? .7 : .4}" ${p.cross ? 'stroke-dasharray="4 4"' : ''} stroke-width="1.2"/>`).join('') +
+      P.map(p => `<a href="${nodeHref(p.t.id)}"><circle cx="${p.x}" cy="${p.y}" r="14" fill="${col(p.t)}" opacity=".14"/><circle cx="${p.x}" cy="${p.y}" r="5" fill="${PERSON.has(p.t.kind) ? 'var(--bg)' : col(p.t)}" stroke="${col(p.t)}" stroke-width="1.6"/><text x="${p.x}" y="${p.y + (p.y < -5 ? -14 : 22)}" text-anchor="middle">${esc(short(p.t.title))}</text></a>`).join('') +
+      `<circle r="30" fill="${col(n)}" opacity=".14"/><circle r="10" fill="${col(n)}"/><text class="me" y="34" text-anchor="middle">${esc(short(n.title))}</text>`;
   }
 
-  // Simulation.
   if (n.sim) {
     KLS.loadScript(`physics/sims/${n.sim}.js`).then(() => {
-      const sim = (window.KLS_SIMS || {})[n.sim];
-      const host = $('#sim-host');
+      const sim = (window.KLS_SIMS || {})[n.sim]; const host = $('#sim-host');
       if (!sim) { host.innerHTML = '<p class="muted small">This simulation is not ready yet.</p>'; return; }
       host.innerHTML = `<h3>${esc(sim.title)}</h3><p class="muted small">${esc(sim.blurb || '')}</p><div id="sim-mount"></div>`;
       sim.mount($('#sim-mount'));
@@ -182,10 +192,10 @@
 
   // Explain it back.
   const ex = $('#ex');
-  const saved = (store.get().explains || []).filter(x => x.id === n.id).pop();
-  if (saved) { ex.value = saved.text; showEx(saved.feedback); }
-  ex.addEventListener('input', () => { $('#ex-n').textContent = ex.value.length > 1200 ? `${1500 - ex.value.length} characters left` : ''; });
+  const prev = (store.get().explains || []).filter(x => x.id === n.id).pop();
   function showEx(fb) { const o = $('#ex-out'); o.style.display = 'block'; o.innerHTML = `<div class="msg ai">${KLS.coachHtml(fb)}</div>`; }
+  if (prev) { ex.value = prev.text; showEx(prev.feedback); }
+  ex.addEventListener('input', () => { $('#ex-n').textContent = ex.value.length > 1200 ? `${1500 - ex.value.length} characters left` : ''; });
   $('#ex-go').addEventListener('click', async () => {
     const text = ex.value.trim();
     if (text.length < 25) { KLS.toast('Write a few sentences first.'); return; }
@@ -198,34 +208,34 @@
     } catch (e) { o.innerHTML = `<p class="notice">${esc(e.message)}</p>`; }
   });
 
-  // Dialogue.
-  const history = [];
+  // Talk it through.
+  const chatLog = [];
   const chat = $('#chat');
-  function addMsg(role, text) { const div = document.createElement('div'); div.className = 'msg ' + (role === 'user' ? 'me' : 'ai'); div.textContent = text; chat.appendChild(div); return div; }
+  function addMsg(role, text) { const div = document.createElement('div'); div.className = 'msg ' + (role === 'user' ? 'me' : 'ai'); div.textContent = text; chat.appendChild(div); }
   async function send() {
     const inp = $('#say'); const t = inp.value.trim(); if (!t) return;
-    inp.value = ''; addMsg('user', t); history.push({ role: 'user', content: t });
+    inp.value = ''; addMsg('user', t); chatLog.push({ role: 'user', content: t });
     const wait = document.createElement('div'); wait.innerHTML = KLS.thinking(); chat.appendChild(wait);
     try {
       await KLS.loadScript('shared/coach.js');
-      const r = await KLS.ai(KLSCoach.P.dialogue(n, history.slice(-12)));
-      wait.remove(); addMsg('assistant', r.trim()); history.push({ role: 'assistant', content: r.trim() });
-    } catch (e) { wait.remove(); addMsg('assistant', e.message); history.pop(); }
+      const r = await KLS.ai(KLSCoach.P.dialogue(n, chatLog.slice(-12)));
+      wait.remove(); addMsg('assistant', r.trim()); chatLog.push({ role: 'assistant', content: r.trim() });
+    } catch (e) { wait.remove(); addMsg('assistant', e.message); chatLog.pop(); }
   }
   $('#say-go').addEventListener('click', send);
   $('#say').addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
 
-  // Connection probe.
+  // Why are these connected?
   app.addEventListener('click', e => {
     const b = e.target.closest('[data-probe]'); if (!b) return;
     const other = node(b.dataset.probe); const link = nb.find(x => x.id === other.id);
-    const m = KLS.modal(`<p class="kicker">Why are these connected?</p>
-      <h3>${esc(n.title)} and ${esc(other.title)}</h3>
+    const m = KLS.modal(`<p class="eyebrow dom">Why are these connected?</p>
+      <h3 style="font-size:1.4rem">${esc(n.title)} and ${esc(other.title)}</h3>
       <p class="muted small">Say it in your own words first. Then compare.</p>
       <textarea class="input" id="pr" maxlength="600" placeholder="They connect because..." style="min-height:110px"></textarea>
-      <div class="row" style="margin-top:10px"><button class="btn primary dom" id="pr-go">Ask the Coach</button><button class="btn ghost" id="pr-show">Just show me</button><button class="btn ghost" data-close>Close</button></div>
+      <div class="row" style="margin-top:10px"><button class="btn dom" id="pr-go">Ask the Coach</button><button class="btn ghost" id="pr-show">Just show me</button><button class="btn ghost" data-close>Close</button></div>
       <div id="pr-out" style="margin-top:12px"></div>`, { label: 'Explain a connection' });
-    m.el.querySelector('#pr-show').addEventListener('click', () => { m.el.querySelector('#pr-out').innerHTML = `<p class="notice">${esc(link.why || '')}</p>`; });
+    m.el.querySelector('#pr-show').addEventListener('click', () => { m.el.querySelector('#pr-out').innerHTML = `<div class="callout"><p>${esc(link.why || '')}</p></div>`; });
     m.el.querySelector('#pr-go').addEventListener('click', async () => {
       const t = m.el.querySelector('#pr').value.trim(); const out = m.el.querySelector('#pr-out');
       if (t.length < 10) { KLS.toast('Write a sentence first.'); return; }

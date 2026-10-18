@@ -5,8 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Explore</title>
 <meta name="description" content="The four rooms of the studio and every journey through them.">
+<meta name="theme-color" content="#0b1120">
 <link rel="stylesheet" href="../shared/studio.css">
 <link rel="icon" href="../shared/icon.svg" type="image/svg+xml">
+<style>
+  .rooms-big { display: grid; gap: 14px; }
+  .rooms-big .room { min-height: 250px; }
+  .rooms-big .room h3 { font-size: clamp(1.8rem, 7vw, 2.4rem); }
+  @media (min-width: 900px) { .rooms-big { grid-template-columns: 1fr 1fr; } .rooms-big .room { min-height: 300px; } }
+</style>
 </head>
 <body data-tab="explore" data-title="Explore">
 <main class="wrap" id="app"></main>
@@ -15,27 +22,38 @@
 <script src="../shared/content/physics.js"></script>
 <script src="../shared/content/psychology.js"></script>
 <script src="../shared/content/english.js"></script>
+<script src="../shared/motif.js"></script>
 <script>
 (function () {
-  const { $, esc, data, allNodes, DOMAINS, ICON, nodeHref, store } = KLS;
+  const { $, esc, data, allNodes, DOMAINS, nodeHref, store, ROOT } = KLS;
   const S = store.get();
   const all = allNodes();
   const saved = Object.keys(S.saved).map(KLS.node).filter(Boolean);
+  const info = (d) => { const D = data(d) || {}; return d === 'english' ? `${(D.words || []).length} words · 6 speaking tools` : `${(D.nodes || []).length} cards · ${(D.modules || []).length} journeys`; };
+  const row = (n) => `<a href="${nodeHref(n.id)}" class="d-${n.domain}"><span class="dot"></span><span class="grow"><div class="t">${esc(n.title)}</div><div class="sub">${esc(DOMAINS[n.domain].name)} · ${esc(n.kindLabel || '')}</div></span></a>`;
   $('#app').innerHTML = `
-    <div class="page-head"><h1>Explore</h1><p class="lede">Four rooms, one web. Start anywhere.</p>
-      <div class="search" style="margin-top:14px"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input class="input" id="q" type="search" placeholder="Search every idea, person and word"></div>
-      <div class="list" id="hits" style="margin-top:8px;display:none"></div>
-    </div>
-    <div class="grid">${['philosophy', 'physics', 'psychology', 'english'].map(d => {
-      const D = data(d) || {};
-      return `<a class="card domain-card d-${d}" href="../${DOMAINS[d].href}"><span class="glyph">${ICON[d]}</span><h3>${DOMAINS[d].name}</h3>
-        <p class="muted small" style="margin:0">${esc((D.domain || {}).tagline || DOMAINS[d].blurb)}</p>
-        <span class="count">${d === 'english' ? `${(D.words || []).length} words, ${(D.tricky || []).length} tricky sounds` : `${(D.nodes || []).length} cards, ${(D.modules || []).length} journeys`}</span></a>`;
-    }).join('')}</div>
-    <section style="margin-top:22px">
-      <a class="card" href="../physics/sims/" style="display:flex;gap:14px;align-items:center"><span class="grow" style="flex:1"><h3 style="margin:0">Quantum simulations</h3><span class="muted small">Ten hands on experiments, from the photoelectric effect to a Bell test.</span></span>${ICON.chev}</a>
+    <header class="hero">
+      <div class="motif">${KLSMotif.room('all', { w: 900, h: 520, seed: 'explore' })}</div>
+      <p class="eyebrow">Explore</p>
+      <h1>Four rooms, <span class="gradient-text">one sky</span>.</h1>
+      <p class="tagline">Start anywhere. Every idea leads somewhere else.</p>
+      <div class="search" style="margin-top:24px;max-width:560px"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input class="input" id="q" type="search" placeholder="Search every idea, person and word"></div>
+      <div class="index" id="hits" style="margin-top:10px;display:none;max-width:560px"></div>
+    </header>
+    <section class="rooms-big">
+      ${['philosophy', 'physics', 'psychology', 'english'].map(d => `<a class="room d-${d}" href="../${DOMAINS[d].href}">
+        <span class="art">${KLSMotif.room(d, { w: 600, h: 360, word: 'English' })}</span>
+        <span class="count">${info(d)}</span><h3>${esc(DOMAINS[d].name)}</h3><p>${esc(((data(d) || {}).domain || {}).tagline || DOMAINS[d].blurb)}</p></a>`).join('')}
     </section>
-    ${saved.length ? `<section><h2>Saved</h2><div class="list">${saved.map(n => `<a href="${nodeHref(n.id)}" class="d-${n.domain}"><span class="dot" style="width:10px;height:10px;border-radius:50%;background:var(--dom);flex:none"></span><span class="grow"><div>${esc(n.title)}</div><div class="sub">${esc(n.line)}</div></span></a>`).join('')}</div></section>` : ''}`;
+    <section>
+      <div class="section-head"><h2>Also here</h2></div>
+      <div class="index">
+        <a href="../web/?d=all"><span class="dot" style="--dom:var(--accent-2)"></span><span class="grow"><div class="t">The whole sky</div><div class="sub">Every idea in all four rooms, and the gold threads between them.</div></span></a>
+        <a href="../physics/sims/" class="d-physics"><span class="dot"></span><span class="grow"><div class="t">Quantum simulations</div><div class="sub">Ten experiments to play with, from the photoelectric effect to a Bell test.</div></span></a>
+        <a href="../review/"><span class="dot" style="--dom:var(--good)"></span><span class="grow"><div class="t">Your review</div><div class="sub">Ideas and words coming back just as you are about to forget them.</div></span></a>
+      </div>
+    </section>
+    ${saved.length ? `<section><div class="section-head"><h2>Saved</h2><span class="more">${saved.length}</span></div><div class="index">${saved.map(row).join('')}</div></section>` : ''}`;
   const q = $('#q'), hits = $('#hits');
   q.addEventListener('input', () => {
     const t = q.value.trim().toLowerCase();
@@ -43,7 +61,7 @@
     const res = all.filter(n => n.title.toLowerCase().includes(t)).slice(0, 12)
       .concat(all.filter(n => !n.title.toLowerCase().includes(t) && (n.line || '').toLowerCase().includes(t)).slice(0, 6));
     hits.style.display = 'block';
-    hits.innerHTML = res.length ? res.map(n => `<a href="${nodeHref(n.id)}" class="d-${n.domain}"><span class="dot" style="width:10px;height:10px;border-radius:50%;background:var(--dom);flex:none"></span><span class="grow"><div>${esc(n.title)}</div><div class="sub">${esc(DOMAINS[n.domain].name)} · ${esc(n.kindLabel || '')}</div></span></a>`).join('') : '<div class="item muted">No matches.</div>';
+    hits.innerHTML = res.length ? res.map(row).join('') : '<div class="item muted">No matches.</div>';
   });
 })();
 </script>

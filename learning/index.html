@@ -5,16 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Kelly's Learning Studio</title>
 <meta name="description" content="Philosophy, quantum physics, psychology and English, connected.">
-<meta name="theme-color" content="#f6f2ea">
+<meta name="theme-color" content="#0b1120">
 <link rel="stylesheet" href="shared/studio.css">
 <link rel="icon" href="shared/icon.svg" type="image/svg+xml">
 <style>
-  .plan .item { gap: 14px; }
-  .plan .num { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-2); font-size: .8rem; flex: none; color: var(--muted); }
-  .link-of-day { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: center; text-align: center; }
-  .link-of-day a { text-decoration: none; }
-  .link-of-day .end { padding: 12px 8px; border-radius: 12px; background: var(--surface-2); font-family: var(--font-display); font-size: 1.02rem; line-height: 1.25; }
-  .link-of-day .mid { color: var(--accent-2); font-size: 1.4rem; }
+  .today-hero h1 { font-size: clamp(2.5rem, 11vw, 4.6rem); max-width: 12ch; }
+  .today-hero .motif { height: 420px; }
+  @media (min-width: 900px) { .today-hero .motif { height: 120%; } }
+  .resume { display: grid; gap: 4px; }
+  .word { position: relative; overflow: hidden; isolation: isolate; }
+  .word .art { position: absolute; inset: auto 0 0 40%; height: 110px; z-index: -1; opacity: .45; -webkit-mask-image: linear-gradient(to top, #000, transparent); mask-image: linear-gradient(to top, #000, transparent); }
+  .word .art svg { width: 100%; height: 100%; }
+  .word .term { font-family: var(--font-display); font-size: clamp(1.9rem, 8vw, 2.6rem); font-weight: 600; line-height: 1.1; }
+  .bridge-card svg { width: 100%; height: auto; aspect-ratio: 520 / 170; display: block; margin: -6px 0 6px; overflow: visible; }
+  .plan .num { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; border: 1px solid var(--line-2); font-family: var(--font-mono); font-size: .74rem; flex: none; color: var(--muted); }
+  .two-col { display: grid; gap: 14px; }
+  @media (min-width: 900px) { .two-col { grid-template-columns: 1fr 1fr; } }
 </style>
 </head>
 <body data-tab="today">
@@ -24,143 +30,109 @@
 <script src="shared/content/physics.js"></script>
 <script src="shared/content/psychology.js"></script>
 <script src="shared/content/english.js"></script>
+<script src="shared/motif.js"></script>
 <script>
 (function () {
-  const { $, esc, store, spaced, data, node, allNodes, nodeHref, dailyPick, DOMAINS, ROOT, todayIso, addDays, playBtn, ICON } = KLS;
+  const { $, esc, store, spaced, data, node, allNodes, nodeHref, dailyPick, DOMAINS, todayIso, addDays, playBtn, ICON } = KLS;
   const S = store.get();
   const E = data('english') || {};
+  const ROOMS = ['philosophy', 'physics', 'psychology', 'english'];
 
-  // ---------- picks of the day ----------
   const words = (E.words || []).filter(w => w.deck !== 'from-ideas');
   const word = dailyPick(words, 'word');
   const tricky = dailyPick(E.tricky || [], 'tricky');
-  const ideaPool = ['philosophy', 'physics', 'psychology'].flatMap(d => allNodes(d)).filter(n => !['thinker', 'psychologist', 'physicist'].includes(n.kind));
-  const unseen = ideaPool.filter(n => !S.seen[n.id]);
-  const idea = dailyPick(unseen.length ? unseen : ideaPool, 'idea');
-  // A cross domain link worth noticing.
   const crossLinks = [];
   allNodes().forEach(n => (n.links || []).forEach(l => { const t = node(l.to); if (t && t.domain !== n.domain && n.kind !== 'word') crossLinks.push({ a: n, b: t, why: l.why }); }));
   const bridge = dailyPick(crossLinks, 'bridge');
 
-  // Journey in progress: the module with the most recent visit that is not finished.
-  function journeyInProgress() {
-    let best = null;
-    for (const d of ['philosophy', 'physics', 'psychology']) for (const m of (data(d) || {}).modules || []) {
-      const seenIso = m.path.map(id => S.seen[id]).filter(Boolean);
-      if (!seenIso.length || seenIso.length === m.path.length) continue;
-      const last = seenIso.sort().pop();
-      if (!best || last > best.last) best = { m, d, last, next: m.path.find(id => !S.seen[id]), done: seenIso.length };
-    }
-    return best;
-  }
-  function suggestJourney() {
-    const order = ['physics', 'philosophy', 'psychology'];
-    const d = order[new Date().getDate() % 3];
-    const m = dailyPick((data(d) || {}).modules || [], 'journey');
-    return m ? { m, d, next: m.path.find(id => !S.seen[id]) || m.path[0], done: m.path.filter(id => S.seen[id]).length } : null;
-  }
+  const allMods = ['philosophy', 'physics', 'psychology'].flatMap(d => ((data(d) || {}).modules || []).map(m => ({ m, d })));
+  const modInfo = ({ m }) => { const r = S.modules[m.id] || {}; const seen = m.path.filter(id => S.seen[id]); return { r, seen: seen.length, last: seen.map(id => S.seen[id]).sort().pop() || '' }; };
+  const inProgress = allMods.filter(x => { const i = modInfo(x); return (i.seen || i.r.step) && !i.r.completedIso; }).sort((a, b) => modInfo(b).last.localeCompare(modInfo(a).last))[0];
+  const suggestion = inProgress || allMods.find(x => x.m.id === 'mod.phys.double-slit') || allMods[0];
   const due = spaced.due();
-  const jip = journeyInProgress() || suggestJourney();
-  const simNode = dailyPick(allNodes('physics').filter(n => n.sim), 'sim');
 
   function plan(mins) {
     const items = [];
+    const sug = suggestion ? { t: `${inProgress ? 'Continue' : 'Begin'}: ${suggestion.m.title}`, s: `${DOMAINS[suggestion.d].name} journey · ${suggestion.m.path.length} stops`, h: `learn/?j=${encodeURIComponent(suggestion.m.id)}` } : null;
     const rev = due.length ? { t: `Review ${Math.min(due.length, mins === 5 ? 5 : 12)} cards that are due`, s: 'Retrieval beats rereading. A few minutes keeps them alive.', h: 'review/' } : null;
-    const say = tricky ? { t: `Say it right: ${tricky.word}`, s: 'One tricky word, heard, said and checked.', h: 'english/say/?id=' + encodeURIComponent(tricky.id) } : null;
-    const jr = jip ? { t: `${jip.done ? 'Continue' : 'Start'}: ${jip.m.title}`, s: `${DOMAINS[jip.d].name} journey, stop ${jip.done + 1} of ${jip.m.path.length}`, h: nodeHref(jip.next).replace(ROOT, '') + '&m=' + encodeURIComponent(jip.m.id) } : null;
-    const wd = word ? { t: `Use it today: ${word.term}`, s: 'Write one sentence with it and get a check.', h: 'english/words/?id=' + encodeURIComponent(word.id) } : null;
+    const say = tricky ? { t: `Say it right: ${tricky.word}`, s: 'One tricky word, heard, said and checked.', h: `english/say/?id=${encodeURIComponent(tricky.id)}` } : null;
+    const wd = word ? { t: `Use it today: ${word.term}`, s: 'Write one sentence with it and get a check.', h: `english/words/?id=${encodeURIComponent(word.id)}` } : null;
     const sh = { t: 'Shadow three sentences', s: 'Copy the music of English: stress, rise and fall.', h: 'english/shadow/' };
-    const sim = simNode ? { t: `Play with a simulation: ${simNode.title}`, s: 'Then explain what you saw in your own words.', h: nodeHref(simNode.id).replace(ROOT, '') } : null;
-    const al = { t: 'Read a passage aloud', s: 'Record one take and get feedback on clarity and pace.', h: 'english/aloud/' };
-    if (mins === 5) items.push(rev || wd, say);
-    if (mins === 15) items.push(rev, jr, say || wd);
-    if (mins === 30) items.push(rev, jr, sim, sh, wd);
-    return items.filter(Boolean).slice(0, mins === 5 ? 2 : mins === 15 ? 3 : 5);
+    if (mins === 5) items.push(rev || say, wd);
+    if (mins === 15) items.push(rev, sug, say);
+    if (mins === 30) items.push(rev, sug, sh, wd);
+    return items.filter(Boolean);
   }
 
-  // ---------- quiet stats ----------
-  const last7 = Array.from({ length: 7 }, (_, i) => addDays(todayIso(), -i));
-  const weekMins = Math.round(last7.reduce((a, d) => a + (S.minutes[d] || 0), 0));
-  const visited = Object.keys(S.seen).length;
-  function streak() {
-    let n = 0; let d = todayIso();
-    if (!S.minutes[d]) d = addDays(d, -1);
-    while (S.minutes[d]) { n++; d = addDays(d, -1); }
-    return n;
-  }
-
-  const counts = {
-    philosophy: allNodes('philosophy').length, physics: allNodes('physics').length, psychology: allNodes('psychology').length, english: (E.words || []).length,
-  };
-  const seenIn = (d) => allNodes(d).filter(n => S.seen[n.id]).length;
+  const days = Array.from({ length: 7 }, (_, i) => addDays(todayIso(), -i));
+  const weekMins = Math.round(days.reduce((a, d) => a + (S.minutes[d] || 0), 0));
+  const counts = { philosophy: allNodes('philosophy').length, physics: allNodes('physics').length, psychology: allNodes('psychology').length, english: (E.words || []).length };
   const lastMins = Number(sessionStorage.getItem('kls.mins') || 15);
+  const hr = new Date().getHours();
+  const when = hr < 5 ? 'Tonight' : hr < 12 ? 'This morning' : hr < 18 ? 'This afternoon' : 'Tonight';
+  const dateStr = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+
+  const sm = suggestion && suggestion.m, si = suggestion && modInfo(suggestion);
 
   $('#app').innerHTML = `
-    <div class="page-head">
-      <p class="kicker">${new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
-      <h1>${esc(KLS.greeting())}</h1>
-      <p class="lede">How much time do you have today?</p>
-      <div class="seg" role="group" aria-label="Time available" id="mins">
-        ${[5, 15, 30].map(m => `<button type="button" data-m="${m}" aria-pressed="${m === lastMins}">${m} minutes</button>`).join('')}
-      </div>
-    </div>
-    <section><div class="list plan" id="plan"></div><p class="muted small" style="margin-top:8px">A suggestion, not a schedule. Go wherever curiosity takes you.</p></section>
+    <header class="hero today-hero">
+      <div class="motif">${KLSMotif.room('all', { w: 900, h: 560 })}</div>
+      <p class="eyebrow">${esc(dateStr)}</p>
+      <h1 class="gradient-text">${esc(KLS.greeting())}.</h1>
+      <p class="tagline">Four rooms, one sky. ${esc(when)}, follow a thread.</p>
+    </header>
 
-    ${word ? `<section>
-      <p class="kicker">Word of the day</p>
-      <div class="card d-english edge">
-        <div class="spread"><h3 style="font-size:1.4rem;margin:0">${esc(word.term)}</h3>${playBtn(word.term)}</div>
-        ${word.say ? `<p class="say" style="margin:.2rem 0 .5rem"><span class="respell">${esc(word.say.respell || '')}</span><span class="ipa">${word.say.ipa ? '/' + esc(word.say.ipa) + '/' : ''}</span></p>` : ''}
-        <p style="margin:.4rem 0">${esc(word.meaning)}</p>
-        <p class="muted small" style="font-style:italic">${esc(word.example)}</p>
-        <div class="meta"><span class="tag">${esc(word.deck)}</span><span class="tag">${esc(word.register)}</span>${word.region !== 'general' ? `<span class="tag">${esc(word.region.toUpperCase())}</span>` : ''}
-          <a class="btn small" style="margin-left:auto" href="english/words/?id=${encodeURIComponent(word.id)}">Use it</a></div>
-      </div></section>` : ''}
-
-    ${idea ? `<section>
-      <p class="kicker">An idea for today</p>
-      <a class="card edge d-${idea.domain}" href="${nodeHref(idea.id)}">
-        <div class="meta"><span class="tag dom">${esc(DOMAINS[idea.domain].name)}</span><span>${esc(idea.kindLabel || '')}</span></div>
-        <h3 style="margin-top:8px;font-size:1.35rem">${esc(idea.title)}</h3>
-        <p class="muted" style="margin:0">${esc(idea.line)}</p>
-      </a></section>` : ''}
-
-    ${bridge ? `<section>
-      <p class="kicker">One link, two worlds</p>
-      <div class="card">
-        <div class="link-of-day">
-          <a class="end d-${bridge.a.domain}" href="${nodeHref(bridge.a.id)}" style="border-bottom:3px solid var(--dom)">${esc(bridge.a.title)}</a>
-          <span class="mid" aria-hidden="true">↔</span>
-          <a class="end d-${bridge.b.domain}" href="${nodeHref(bridge.b.id)}" style="border-bottom:3px solid var(--dom)">${esc(bridge.b.title)}</a>
-        </div>
-        <p style="margin:12px 0 0">${esc(bridge.why)}</p>
-        <a class="btn small" style="margin-top:12px" href="web/?d=all&focus=${encodeURIComponent(bridge.a.id)}">Follow it in the web</a>
-      </div></section>` : ''}
+    ${sm ? `<section><a class="cover big d-${suggestion.d}" href="learn/?j=${encodeURIComponent(sm.id)}">
+      <span class="art">${KLSMotif.journey(sm, { domain: suggestion.d, lit: Object.fromEntries(sm.path.filter(id => S.seen[id]).map(id => [id, true])), w: 640, h: 220 })}</span>
+      <span class="top"><span class="tag dom">${inProgress ? 'Pick up where you left off' : 'A good first journey'}</span><span class="tag">${esc(DOMAINS[suggestion.d].name)}</span></span>
+      <h3>${esc(sm.title)}</h3>
+      <p>${esc(sm.blurb || '')}</p>
+      <span class="foot"><span class="stars">${sm.path.map(id => `<i class="${S.seen[id] ? 'on' : ''}"></i>`).join('')}</span><span class="state">${inProgress ? `${si.seen} of ${sm.path.length} · Continue →` : 'Begin →'}</span></span>
+    </a></section>` : ''}
 
     <section>
-      <h2>Your four rooms</h2>
-      <div class="grid two">
-        ${['philosophy', 'physics', 'psychology', 'english'].map(d => `<a class="card domain-card d-${d}" href="${DOMAINS[d].href}">
-          <span class="glyph">${ICON[d]}</span><h3>${DOMAINS[d].name}</h3><p class="muted small" style="margin:0">${esc(DOMAINS[d].blurb)}</p>
-          <span class="count">${d === 'english' ? `${counts.english} words and phrases` : `${seenIn(d)} of ${counts[d]} visited`}</span></a>`).join('')}
-      </div>
-      <a class="card" href="web/?d=all" style="margin-top:12px;display:flex;align-items:center;gap:14px">
-        <span class="glyph" style="width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:color-mix(in srgb,var(--accent-2) 16%,transparent);color:var(--accent-2)">${ICON.web.replace('<svg', '<svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6"')}</span>
-        <span style="flex:1"><h3 style="margin:0">The Super Web</h3><span class="muted small">Every idea in all four rooms, and how they connect.</span></span>${ICON.chev}
-      </a>
+      <div class="section-head"><h2>How much time do you have?</h2></div>
+      <div class="seg" role="group" aria-label="Time available" id="mins">${[5, 15, 30].map(m => `<button type="button" data-m="${m}" aria-pressed="${m === lastMins}">${m} min</button>`).join('')}</div>
+      <div class="index plan" id="plan" style="margin-top:14px"></div>
+      <p class="muted small" style="margin-top:10px">A suggestion, not a schedule.</p>
     </section>
 
-    <section class="muted small" style="display:flex;gap:18px;flex-wrap:wrap">
-      <span>${weekMins} minutes this week</span><span>${visited} ideas visited</span><span>${Object.keys(S.review).length} cards in review</span>
-      ${S.profile.streaks ? `<span>${streak()} day streak</span>` : ''}
-    </section>`;
+    <div class="two-col">
+      ${word ? `<section class="card word d-english" style="margin:0">
+        <div class="art">${KLSMotif.room('english', { w: 600, h: 120, word: word.term })}</div>
+        <p class="eyebrow dom">Word of the day</p>
+        <div class="spread"><span class="term">${esc(word.term)}</span>${playBtn(word.term)}</div>
+        ${word.say ? `<p class="say" style="margin:.4rem 0 .2rem"><span class="respell">${esc(word.say.respell || '')}</span>${word.say.ipa ? `<span class="ipa">/${esc(word.say.ipa)}/</span>` : ''}</p>` : ''}
+        <p style="margin:.6rem 0 .4rem;font-family:var(--font-read);font-size:1.06rem">${esc(word.meaning)}</p>
+        <p class="muted" style="font-family:var(--font-read);font-style:italic">${esc(word.example)}</p>
+        <a class="btn small" href="english/words/?id=${encodeURIComponent(word.id)}" style="margin-top:6px">Use it in a sentence</a>
+      </section>` : ''}
+      ${bridge ? `<section class="card bridge-card" style="margin:0">
+        <p class="eyebrow" style="--dom:var(--accent-2)">One link, two worlds</p>
+        ${KLSMotif.pair(bridge.a, bridge.b, { w: 520, h: 170, labels: true })}
+        <p style="font-family:var(--font-read);font-size:1.08rem;line-height:1.6;margin:0 0 12px">${esc(bridge.why)}</p>
+        <div class="row"><a class="btn small" href="${nodeHref(bridge.a.id)}">${esc(bridge.a.title)}</a><a class="btn small" href="${nodeHref(bridge.b.id)}">${esc(bridge.b.title)}</a></div>
+      </section>` : ''}
+    </div>
+
+    <section style="margin-top:48px">
+      <div class="section-head"><h2>The four rooms</h2><a class="more" href="web/?d=all">The whole sky →</a></div>
+      <div class="grid two four">
+        ${ROOMS.map(d => `<a class="room d-${d}" href="${DOMAINS[d].href}">
+          <span class="art">${KLSMotif.room(d, { w: 400, h: 300, word: 'English' })}</span>
+          <span class="count">${d === 'english' ? `${counts.english} words` : `${counts[d]} cards`}</span>
+          <h3>${esc(DOMAINS[d].name)}</h3><p>${esc(DOMAINS[d].blurb)}</p></a>`).join('')}
+      </div>
+    </section>
+
+    <p class="footer-note">${weekMins} minutes this week · ${Object.keys(S.seen).length} ideas visited · ${Object.keys(S.review).length} cards in review</p>`;
 
   function drawPlan(m) {
     sessionStorage.setItem('kls.mins', m);
     document.querySelectorAll('#mins button').forEach(b => b.setAttribute('aria-pressed', String(Number(b.dataset.m) === m)));
-    $('#plan').innerHTML = plan(m).map((it, i) => `<a href="${it.h}"><span class="num">${i + 1}</span><span class="grow"><div>${esc(it.t)}</div><div class="sub">${esc(it.s)}</div></span><span class="chev">${ICON.chev}</span></a>`).join('');
+    $('#plan').innerHTML = plan(m).map((it, i) => `<a href="${it.h}"><span class="num">${i + 1}</span><span class="grow"><div class="t">${esc(it.t)}</div><div class="sub">${esc(it.s)}</div></span><span class="chev">${ICON.chev}</span></a>`).join('');
   }
-  $('#mins').addEventListener('click', e => { const b = e.target.closest('[data-m]'); if (!b) return; const m = Number(b.dataset.m); drawPlan(m); store.update(s => { s.sessions.push({ startIso: new Date().toISOString(), plan: m }); if (s.sessions.length > 300) s.sessions.shift(); }); });
+  $('#mins').addEventListener('click', e => { const b = e.target.closest('[data-m]'); if (!b) return; drawPlan(Number(b.dataset.m)); store.update(s => { s.sessions.push({ startIso: new Date().toISOString(), plan: Number(b.dataset.m) }); if (s.sessions.length > 300) s.sessions.shift(); }); });
   drawPlan(lastMins);
 })();
 </script>

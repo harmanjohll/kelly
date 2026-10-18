@@ -81,6 +81,8 @@ learning/
     audio.js                 microphone recorder (ported; Safari safe; onStream hook for pitch)
     pitch.js                 live pitch tracking and the pitch line
     graph.js                 Mind Web renderer (D3 v7 from cdnjs)
+    motif.js                 generative SVG art drawn from the content
+    lesson.js                the guided lesson engine
     domain.js                renders a domain page: journeys plus filterable browser
     content/
       philosophy.js  physics.js  psychology.js  english.js
@@ -88,6 +90,7 @@ learning/
   philosophy/ physics/ psychology/   thin shells over shared/domain.js
   physics/sims/              ten simulations, one file each, plus a gallery page
   english/                   hub; english.js (recorder widget); words, say, sounds, shadow, aloud, wordlab
+  learn/                     guided lesson for a journey: ?j=<moduleId>&s=<step> (shared/lesson.js)
   idea/                      renders any node: ?id=phil.determinism[&m=<moduleId>]
   web/                       Mind Web: ?d=all|philosophy|physics|psychology|english&mode=focus|overview&focus=<id>
   practise/                  practice hub
@@ -157,10 +160,14 @@ Pronunciation feedback is specific: the word, what was heard, the target (respel
 
 ## 8. Visual language
 
-- Warm off white ground, deep ink text, one desaturated colour per domain: Philosophy violet, Physics teal, Psychology terracotta, English olive.
-- Fraunces for display, Inter for body, IBM Plex Mono for maths and IPA.
-- Light and dark themes via `prefers-color-scheme` and a manual toggle.
-- Phone first: bottom tab bar (Today, Explore, Web, Practise, You), 44px touch targets, safe area insets, no horizontal scroll at 360px. On wide screens the tab bar becomes a top bar.
+"The Observatory", recorded in full in `docs/design.md` (tokens, motifs, page patterns and the review checklist). In short:
+
+- Night by default, warm paper as the alternative (`data-theme` night, paper or auto). Lineage: Alexey's Science Studio.
+- One luminous colour per room: Philosophy violet, Physics cyan, Psychology coral, English gold green; gold for links across rooms.
+- Fraunces for display, Source Serif 4 for reading, Inter Tight for interface, IBM Plex Mono for labels, numbers, IPA and maths.
+- Every picture is generated from the content (`shared/motif.js`): rooms, journeys and bridges are constellations.
+- Journeys are guided lessons (`learn/`), one step per screen.
+- Phone first: bottom tab bar, 44px targets, no horizontal scroll at 360px; on wide screens the tab bar moves to the top.
 - Motion is gentle and respects `prefers-reduced-motion`.
 
 ---

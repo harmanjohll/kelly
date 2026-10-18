@@ -70,7 +70,7 @@
   const KEY = 'kls.progress';
   const DEFAULTS = () => ({
     version: 1,
-    profile: { name: 'Kelly', voice: 'en-GB', rate: 1, theme: 'auto', streaks: false },
+    profile: { name: 'Kelly', voice: 'en-GB', rate: 1, theme: 'night', streaks: false },
     seen: {}, saved: {}, review: {}, modules: {}, minutes: {}, sessions: [], explains: [], speaking: [],
   });
   let cache = null;
@@ -277,10 +277,17 @@
   }
 
   // ---------- theme ----------
-  function applyTheme() {
+  // Night is the default; paper is the warm light alternative; auto follows the device.
+  function themeName() {
     const t = load().profile.theme;
-    if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
-    else document.documentElement.removeAttribute('data-theme');
+    if (t === 'dark') return 'night';
+    if (t === 'light') return 'paper';
+    return t === 'paper' || t === 'auto' ? t : 'night';
+  }
+  function applyTheme() {
+    document.documentElement.setAttribute('data-theme', themeName());
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#0b1120');
     document.dispatchEvent(new CustomEvent('kls-theme'));
   }
   applyTheme();
@@ -345,7 +352,7 @@
       <button class="btn small" id="set-hear">Hear a sample</button>
       <h3 style="margin-top:22px">Look and feel</h3>
       <label class="field"><span>Theme</span><select class="input" id="set-theme">
-        ${[['auto', 'Match my device'], ['light', 'Light'], ['dark', 'Dark']].map(([v, l]) => `<option value="${v}" ${v === p.theme ? 'selected' : ''}>${l}</option>`).join('')}
+        ${[['night', 'Night'], ['paper', 'Paper'], ['auto', 'Match my device']].map(([v, l]) => `<option value="${v}" ${v === themeName() ? 'selected' : ''}>${l}</option>`).join('')}
       </select></label>
       <label class="row" style="min-height:44px"><input type="checkbox" id="set-streaks" ${p.streaks ? 'checked' : ''} style="width:20px;height:20px"> Show a day streak on Today</label>
       <p class="small muted" style="margin-top:20px">Backups, export and reset live in <a href="${ROOT}you/">You</a>.</p>
@@ -382,11 +389,11 @@
     top.innerHTML = `<div class="inner">
       ${back ? `<a class="back" href="${esc(back)}" aria-label="Back">${ICON.back}</a>` : ''}
       <a class="brand" href="${ROOT}">
-        <svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="15" fill="var(--ink)"/><circle cx="11" cy="12.5" r="2.6" fill="var(--phil)"/><circle cx="21" cy="12.5" r="2.6" fill="var(--phys)"/><circle cx="11" cy="20.5" r="2.6" fill="var(--psy)"/><circle cx="21" cy="20.5" r="2.6" fill="var(--eng)"/><path d="M11 12.5L21 20.5M21 12.5L11 20.5" stroke="var(--bg)" stroke-width="1" opacity=".6"/></svg>
+        <svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M8 10 L22 7 L25 21 L10 24 Z" fill="none" stroke="var(--accent-2)" stroke-width="1" stroke-dasharray="2 2.4" opacity=".8"/><circle cx="8" cy="10" r="2.6" fill="var(--phil)"/><circle cx="22" cy="7" r="2.2" fill="var(--phys)"/><circle cx="25" cy="21" r="2.6" fill="var(--psy)"/><circle cx="10" cy="24" r="2.2" fill="var(--eng)"/></svg>
         <span class="name">${esc(b.dataset.title || "Kelly's Learning Studio")}</span>
       </a>
       <div class="actions">
-        <button class="icon-btn" id="kls-theme" aria-label="Switch light or dark">${ICON.moon}</button>
+        <button class="icon-btn" id="kls-theme" aria-label="Switch between night and paper">${ICON.moon}</button>
         <button class="icon-btn" id="kls-settings" aria-label="Settings">${ICON.gear}</button>
       </div></div>`;
     b.prepend(top);
@@ -397,9 +404,9 @@
     b.appendChild(nav);
     $('#kls-settings').addEventListener('click', () => openSettings());
     $('#kls-theme').addEventListener('click', () => {
-      const dark = document.documentElement.getAttribute('data-theme') === 'dark' ||
-        (!document.documentElement.getAttribute('data-theme') && matchMedia('(prefers-color-scheme: dark)').matches);
-      store.update(s => { s.profile.theme = dark ? 'light' : 'dark'; });
+      const t = themeName();
+      const night = t === 'night' || (t === 'auto' && !matchMedia('(prefers-color-scheme: light)').matches);
+      store.update(s => { s.profile.theme = night ? 'paper' : 'night'; });
       applyTheme();
     });
   }
