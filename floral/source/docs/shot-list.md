@@ -1,27 +1,33 @@
 # Photography brief
 
-The site is built in type and colour; photographs slot into the posters and the portrait frames. The site supplies the colour, so the photographs should not.
+The site is quiet and editorial, so the photographs should be too. One consistent look matters more than expensive equipment; a recent phone and window light are enough.
 
 ## The look
 
-- **Backdrop:** plain, neutral, matte. A grey or off white wall or board. No patterns, no props, no coloured cloths.
-- **Light:** soft daylight from one side. No flash.
-- **Crop:** portrait, **4:5**, the same shape as the posters. Leave space above the flowers.
-- **Same setup every time.** Mark the spot and the camera height so every piece matches.
+- **Light:** soft daylight from one side, near a window, never direct sun. No flash.
+- **Background:** a plain wall or board in a warm grey or soft green close to the site's paper colour (`#f1f2ec`). No patterned cloths, no props unless they tell the story.
+- **Framing:** portrait, 4:5. Leave space around the piece; the site crops gently.
+- **Same setup every time.** Mark the spot on the table and the camera height so every piece matches.
 
 ## Must have
 
-1. **Every piece, straight on.** One photo per piece, same distance, same light.
-2. **Every crochet piece, close up.** Fill the frame with stitches. The texture is the argument for the price.
-3. **The One That Stays, a week later.** The fresh flowers faded or gone, the crochet bloom still there.
-4. **Kelly, at work.** Square, for the home page; looking at the work, not the camera.
-5. **Hands mid stitch**, close, hook and yarn visible, for Kelly's story page.
+1. **The hero.** One arrangement, fresh on the left half, crochet on the right, tied together. This replaces the drawing on the home page. Shoot straight on, at the height of the bouquet's middle.
+2. **Every piece, straight on.** Same distance, same light. This replaces the drawing on each card.
+3. **Every crochet piece, close up.** Fill the frame with stitches. The texture is the argument for the price.
+4. **The One That Stays, after a week.** The fresh flowers faded or gone, the crochet bloom still there. This one picture tells the whole brand story.
 
-## Putting a photo on the site
+## Kelly at work
 
-1. Save the photo as a JPEG, about 1600 by 2000 pixels, named after the piece: `sunday-tulips.jpg`.
-2. Put it in `floral/source/public/photos/`.
-3. In `floral/source/src/data/products.json`, add `"photo": "photos/sunday-tulips.jpg"` to that piece.
-4. Run `npm run release` from `floral/source`, then commit and push.
+5. **Portrait** at the worktable, natural light, looking at the work rather than the camera.
+6. **Hands mid stitch**, close up, hook and yarn visible.
+7. **The market:** an early morning at the flower market, buckets and stems.
+8. **Wrapping:** hands tying a bouquet.
 
-The poster for that piece is replaced by the photograph everywhere: collections, the piece page and the consultation.
+## Nice to have
+
+- A short video (10 seconds) of a crochet petal being made, for the piece pages.
+- Each piece in a real setting: a desk, a bedside, a dining table.
+
+## Files
+
+Export JPEGs at 2000px on the long edge. Name them after the piece's slug, e.g. `sunday-tulips.jpg`, `sunday-tulips-detail.jpg`.

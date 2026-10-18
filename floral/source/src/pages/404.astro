@@ -1,19 +1,15 @@
 ---
 import Base from '../layouts/Base.astro';
 import { url } from '../lib/url';
-import WiltWord from '../components/WiltWord.astro';
 ---
 <Base title="Page not found">
   <section class="wrap lost">
-    <WiltWord word="404" tag="div" class="big" />
     <h1>This page has wilted.</h1>
     <p>The link may be old, or the piece may no longer be made.</p>
     <p><a class="btn" href={url('/')}>Back to the start</a></p>
   </section>
 </Base>
 <style>
-  .lost { padding-top: clamp(2rem, 8vw, 5rem); display: grid; gap: 1.25rem; justify-items: start; }
-  .lost :global(.big) { font-size: clamp(6rem, 30vw, 20rem); }
-  .lost h1 { text-transform: uppercase; font-stretch: 75%; }
-  .lost p { font-size: 1.15rem; }
+  .lost { padding-top: clamp(3rem, 10vw, 7rem); display: grid; gap: 1rem; justify-items: start; }
+  .lost p { color: var(--ink-2); font-size: 1.15rem; }
 </style>
