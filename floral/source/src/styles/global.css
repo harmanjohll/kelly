@@ -1,66 +1,45 @@
-/* Kelly: design tokens and base styles.
-   Shape rule: interactive controls (buttons, chips) are full pill; images and panels are 2px. */
+/* Kelly: "Wilting Type".
+   Fresh fades, crochet stays: the brand idea is set in the type itself.
+   Shape rule: everything square (radius 0) except pill buttons. Hairlines, no shadows, no cards. */
 
 :root {
-  --paper: #f1f2ec;
-  --paper-2: #e6e8df;
-  --ink: #18221d;
-  --ink-2: #4a554e;
-  --line: #c6ccc1;
-  --accent: #b23a5e;
-  --accent-ink: #fbf7f4;
-  --stem: #5f7466;
+  --paper: #f1f1ec;
+  --paper-2: #e5e5dd;
+  --ink: #151515;
+  --ink-2: #55554f;
+  --line: #c9c9bf;
 
-  --bloom-blush: #e9a6b5;
-  --bloom-sun: #e8c25a;
-  --bloom-wine: #8e2c48;
-  --bloom-ivory: #dcd9c9;
-  --bloom-sage: #9fb39b;
+  /* The current intention's colour field. Set per page or by the consultation. */
+  --field: var(--ink);
+  --field-ink: var(--paper);
 
-  --serif: 'Cormorant Garamond', 'Iowan Old Style', Georgia, serif;
-  --sans: 'Hanken Grotesk Variable', 'Hanken Grotesk', system-ui, sans-serif;
+  --display: 'Anybody Variable', 'Arial Narrow', 'Helvetica Neue', sans-serif;
+  --text: 'Hanken Grotesk Variable', system-ui, sans-serif;
+  --voice: 'Newsreader Variable', Georgia, 'Times New Roman', serif;
 
-  --measure: 62ch;
-  --wrap: 1240px;
-  --gutter: clamp(16px, 4vw, 48px);
+  --wrap: 1440px;
+  --gutter: clamp(16px, 3.2vw, 48px);
   --pill: 999px;
-  --edge: 2px;
 
   --tempo: 1;
-  --breath: 7s;
-  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
   color-scheme: light dark;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: #121814;
-    --paper-2: #1a221d;
-    --ink: #e8eae3;
-    --ink-2: #a9b2ab;
-    --line: #2f3a33;
-    --accent: #e58aa5;
-    --accent-ink: #1c1014;
-    --stem: #8fa597;
-
-    --bloom-blush: #d48899;
-    --bloom-sun: #d2ab48;
-    --bloom-wine: #c25877;
-    --bloom-ivory: #8f8c7f;
-    --bloom-sage: #7f977c;
+    --paper: #121211;
+    --paper-2: #1d1d1b;
+    --ink: #ededE6;
+    --ink-2: #a3a39a;
+    --line: #34342f;
   }
 }
 
-/* The quiet register: for grief, apology and hard seasons the page slows and softens. */
-[data-register='quiet'] {
-  --accent: #5f7466;
-  --tempo: 1.8;
-  --breath: 11s;
-}
-@media (prefers-color-scheme: dark) {
-  [data-register='quiet'] { --accent: #9db3a4; }
-}
+/* Grief, apology and hard seasons: everything moves more slowly. */
+[data-register='quiet'] { --tempo: 1.8; }
 
 *, *::before, *::after { box-sizing: border-box; }
 [hidden] { display: none !important; }
@@ -69,66 +48,88 @@ body {
   margin: 0;
   background: var(--paper);
   color: var(--ink);
-  font-family: var(--sans);
+  font-family: var(--text);
   font-size: 17px;
-  line-height: 1.6;
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
-  transition: background-color calc(0.6s * var(--tempo)) ease;
 }
 img, svg { display: block; max-width: 100%; }
-a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 1px; }
-a:hover { color: var(--accent); }
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+a { color: inherit; text-underline-offset: 0.18em; text-decoration-thickness: 1px; }
+a:hover { text-decoration-thickness: 2px; }
+:focus-visible { outline: 3px solid currentColor; outline-offset: 3px; }
+button { font: inherit; color: inherit; }
 
-h1, h2, h3 { font-family: var(--serif); font-weight: 500; line-height: 1.08; letter-spacing: -0.01em; margin: 0; text-wrap: balance; }
-h1 { font-size: clamp(2.6rem, 6vw, 4.6rem); }
-h2 { font-size: clamp(2rem, 4vw, 3rem); }
-h3 { font-size: clamp(1.4rem, 2.4vw, 1.75rem); }
-em { font-style: italic; }
-p { margin: 0 0 1em; max-width: var(--measure); text-wrap: pretty; }
+h1, h2, h3 {
+  font-family: var(--display);
+  font-weight: 760;
+  font-stretch: 88%;
+  line-height: 0.95;
+  letter-spacing: -0.015em;
+  margin: 0;
+  text-wrap: balance;
+}
+h1 { font-size: clamp(3rem, 9vw, 8rem); }
+h2 { font-size: clamp(2.2rem, 5.6vw, 4.6rem); }
+h3 { font-size: clamp(1.4rem, 2.4vw, 1.9rem); font-stretch: 95%; }
+p { margin: 0 0 1em; max-width: 60ch; text-wrap: pretty; }
 
-.wrap { max-width: var(--wrap); margin: 0 auto; padding: 0 var(--gutter); }
+.wrap { max-width: var(--wrap); margin: 0 auto; padding-left: var(--gutter); padding-right: var(--gutter); }
 .muted { color: var(--ink-2); }
 .small { font-size: 0.875rem; }
+.voice { font-family: var(--voice); font-style: italic; font-weight: 380; }
+.label { font-family: var(--display); font-stretch: 110%; font-weight: 600; font-size: 0.8rem; letter-spacing: 0.06em; text-transform: uppercase; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 
-/* Buttons and chips */
+/* Buttons: pills are the only rounded shape on the site. */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 0.5em;
-  min-height: 48px; padding: 0 1.4em; border-radius: var(--pill);
-  font: 500 1rem/1 var(--sans); text-decoration: none; white-space: nowrap; cursor: pointer;
-  border: 1px solid var(--ink); background: var(--ink); color: var(--paper);
-  transition: transform 0.15s var(--ease), background-color 0.2s ease, color 0.2s ease;
+  min-height: 48px; padding: 0 1.5em; border-radius: var(--pill);
+  font-family: var(--display); font-stretch: 105%; font-weight: 650; font-size: 1rem; letter-spacing: 0.01em;
+  text-decoration: none; white-space: nowrap; cursor: pointer;
+  border: 2px solid var(--ink); background: var(--ink); color: var(--paper);
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s var(--ease);
 }
-.btn:hover { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
-.btn:active { transform: translateY(1px) scale(0.98); }
+.btn:hover { background: transparent; color: var(--ink); }
+.btn:active { transform: scale(0.97); }
 .btn.ghost { background: transparent; color: var(--ink); }
-.btn.ghost:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
-.btn[disabled] { opacity: 0.45; cursor: not-allowed; }
+.btn.ghost:hover { background: var(--ink); color: var(--paper); }
+.btn[disabled] { opacity: 0.4; cursor: not-allowed; }
+.arrow-link { font-family: var(--display); font-stretch: 105%; font-weight: 650; text-decoration: none; border-bottom: 2px solid currentColor; padding-bottom: 0.1em; }
+.arrow-link::after { content: ' \2192'; }
 
-/* Illustrations */
-.art path, .threshold-art path { fill: none; stroke: var(--ink); stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round; }
-.art .shape, .threshold-art .shape { fill: color-mix(in srgb, var(--tone) 42%, var(--paper)); }
-.bloom.crochet path { stroke: color-mix(in srgb, var(--tone) 45%, var(--ink)); stroke-width: 2.4; stroke-dasharray: 3 2.6; }
-.art .bloom.crochet .shape, .threshold-art .bloom.crochet .shape { fill: color-mix(in srgb, var(--tone) 88%, var(--paper)); }
-.bloom .knit { fill: url(#knit); stroke: none !important; }
-.knit-v { stroke: var(--ink) !important; stroke-opacity: 0.28; stroke-width: 0.9 !important; stroke-dasharray: none !important; }
-.stem { stroke: var(--stem) !important; stroke-width: 1.4 !important; }
-.stem.stitch { stroke-width: 3 !important; stroke-dasharray: 3 2.6; }
-.tie path { stroke: var(--accent) !important; stroke-width: 2.2 !important; }
+/* Photo slots: where Kelly's photographs will go. Designed, not apologetic. */
+.photo-slot {
+  position: relative; background: var(--paper-2); outline: 1px solid var(--line); outline-offset: -1px;
+  display: grid; place-items: end start; padding: 1rem; color: var(--ink-2); font-size: 0.85rem; min-height: 12rem;
+  background-image: repeating-linear-gradient(135deg, transparent 0 22px, color-mix(in srgb, var(--line) 45%, transparent) 22px 23px);
+}
 
 @media (prefers-reduced-motion: no-preference) {
-  .half-fresh { transform-box: view-box; transform-origin: 320px 500px; animation: breathe var(--breath) ease-in-out infinite; }
-  @keyframes breathe {
-    0%, 100% { transform: rotate(0deg) scale(1); }
-    50% { transform: rotate(-1.4deg) scale(1.018); }
-  }
-  .js .reveal { opacity: 0; transform: translateY(18px); transition: opacity calc(0.9s * var(--tempo)) var(--ease), transform calc(0.9s * var(--tempo)) var(--ease); }
+  .js .reveal { opacity: 0; transform: translateY(24px); transition: opacity calc(0.8s * var(--tempo)) var(--ease), transform calc(0.8s * var(--tempo)) var(--ease); }
   .js .reveal.in { opacity: 1; transform: none; }
 }
 
-/* Photo slots: where Kelly's photographs will go. */
-.photo-slot {
-  border: 1px dashed var(--line); border-radius: var(--edge); background: var(--paper-2);
-  display: grid; place-items: center; text-align: center; padding: 1.5rem; color: var(--ink-2); font-size: 0.875rem;
+/* Posters: a piece shown in type until its photograph exists. Used by cards, piece pages and the consultation. */
+.poster {
+  position: relative; display: grid; grid-template-rows: auto 1fr auto; gap: 0.75rem;
+  aspect-ratio: 4 / 5; max-width: 100%; padding: clamp(0.9rem, 2vw, 1.4rem);
+  background: var(--pbg); color: var(--pink); overflow: hidden;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 14%, transparent);
 }
+.poster.has-photo { padding: 0; background: var(--paper-2); }
+.poster.has-photo img { width: 100%; height: 100%; object-fit: cover; }
+.p-line { font-family: var(--display); font-stretch: 112%; font-weight: 600; font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; }
+.p-name {
+  align-self: end; font-family: var(--display); font-weight: 800; font-stretch: 72%;
+  font-size: clamp(2.1rem, 4.6vw, 3.6rem); line-height: 0.9; letter-spacing: -0.01em; text-transform: uppercase; text-wrap: balance;
+}
+.poster.lg .p-name { font-size: clamp(3rem, 8vw, 6.5rem); }
+.p-foot { display: flex; justify-content: space-between; align-items: end; gap: 1rem; min-height: 1.6rem; }
+.life { display: inline-flex; align-items: end; gap: 0.5rem; }
+.life b { font-family: var(--display); font-weight: 700; font-size: 1.6rem; line-height: 0.8; }
+.poster.lg .life b { font-size: 2.6rem; }
+.days { display: inline-flex; gap: 3px; align-items: end; }
+.days i { display: block; width: 6px; height: 1.3rem; background: currentColor; opacity: calc(1 - var(--d) * 0.13); transform-origin: bottom; transform: scaleY(calc(1 - var(--d) * 0.1)); }
+.poster.lg .days i { width: 10px; height: 2.2rem; }
+.stems { display: inline-flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px; max-width: 7.5rem; }
+.stems i { display: block; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }

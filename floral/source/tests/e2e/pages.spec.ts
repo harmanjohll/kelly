@@ -22,12 +22,23 @@ for (const path of pages) {
   });
 }
 
-test('reduced motion stops the breathing hero', async ({ page }, info) => {
+test('reduced motion stops the wilting', async ({ page }, info) => {
   test.skip(info.project.name !== 'desktop-reduced-motion');
   await page.goto('./');
   expect(await page.evaluate(() => matchMedia('(prefers-reduced-motion: reduce)').matches)).toBe(true);
-  const anim = await page.locator('.half-fresh').evaluate((el) => getComputedStyle(el).animationName);
-  expect(anim).toBe('none');
+  await page.waitForTimeout(300);
+  const anims = await page.locator('.wilt-word .l').evaluateAll((els) => els.map((el) => getComputedStyle(el).animationName));
+  expect(anims.every((a) => a === 'none')).toBe(true);
+});
+
+test('fleeting wilts, and watering revives it', async ({ page }, info) => {
+  test.skip(info.project.name !== 'desktop');
+  await page.goto('./');
+  const word = page.locator('.hero .wilt-word');
+  await expect(word).toHaveClass(/go/);
+  await page.getByRole('button', { name: /Fleeting\. Tap to water/ }).click();
+  await expect(word).toHaveClass(/water/);
+  await expect(word).toHaveClass(/go/, { timeout: 3000 });
 });
 
 test('every internal link resolves', async ({ page, request }, info) => {

@@ -18,7 +18,7 @@ The site runs today on placeholders. Each item below replaces one. When all are 
 - [ ] `summary` and `story` in Kelly's words. The current text is a draft written to show tone.
 - [ ] For crochet: real `makeHours` and `yarn`. The current hours are estimates, not facts.
 - [ ] `leadDays`, `size`, `care`, `stems`
-- [ ] Photographs (see `docs/shot-list.md`)
+- [ ] Photographs (see `docs/shot-list.md`; each one replaces that piece's poster via its `photo` field)
 
 How the coach uses each field:
 

@@ -1,0 +1,26 @@
+---
+// FOREVER, set as stitched lettering: a dashed outline like a crochet chain. It never moves.
+interface Props { word: string; tag?: 'h1' | 'h2' | 'div'; class?: string; width?: number }
+const { word, tag = 'h1', class: cls, width } = Astro.props;
+const Tag = tag;
+// The viewBox is wide enough for the word; textLength makes the letters fill it exactly.
+const vbW = width ?? word.length * 128;
+---
+<Tag class:list={['stitch-word', cls]}>
+  <span class="sr-only">{word}</span>
+  <svg viewBox={`0 0 ${vbW} 170`} aria-hidden="true" preserveAspectRatio="xMinYMid meet" style={`--chars:${word.length}`}>
+    <text x="4" y="148" textLength={vbW - 8} lengthAdjust="spacingAndGlyphs">{word.toUpperCase()}</text>
+  </svg>
+</Tag>
+
+<style>
+  .stitch-word { margin: 0; line-height: 1; font-size: inherit; }
+  svg { width: calc(var(--chars) * 0.78em); max-width: 100%; height: auto; overflow: visible; }
+  text {
+    font-family: var(--display); font-weight: 820; font-size: 172px;
+    font-variation-settings: 'wdth' 110;
+    fill: none; stroke: currentColor; stroke-width: 3.6; stroke-linecap: round; stroke-linejoin: round;
+    stroke-dasharray: 9 7;
+    paint-order: stroke;
+  }
+</style>
